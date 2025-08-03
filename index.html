@@ -345,6 +345,9 @@
     <!-- Toast Notification -->
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
+    <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
+        BETA Version 1.1
+    </div>
 
     <script>
         // --- GAME STATE & CONFIG ---
@@ -891,8 +894,8 @@
                 item: item,
                 currentBid: item.basePrice,
                 highestBidder: 'Starting Bid',
-                timer: 30,
-                maxTime: 30,
+                timer: 35,
+                maxTime: 35,
                 rivals: [
                     { name: 'Baron von Rich', cash: gameState.netWorth * (0.8 + Math.random() * 0.4), aggression: 0.6 },
                     { name: 'Lady Sterling', cash: gameState.netWorth * (0.9 + Math.random() * 0.4), aggression: 0.4 }
@@ -914,7 +917,6 @@
                 if (bidChance < rival.aggression && rival.cash > nextBid && auctionState.highestBidder !== rival.name) {
                     auctionState.currentBid = Math.ceil(nextBid / 1000) * 1000;
                     auctionState.highestBidder = rival.name;
-                    auctionState.timer = Math.min(auctionState.maxTime, auctionState.timer + 5); // Extend timer on bid
                     showToast(`${rival.name} places a bid!`);
                 }
             });
@@ -931,7 +933,6 @@
             if (gameState.cash >= nextBid) {
                 auctionState.currentBid = nextBid;
                 auctionState.highestBidder = gameState.playerName;
-                auctionState.timer = Math.min(auctionState.maxTime, auctionState.timer + 8);
                 updateAuctionUI();
             } else {
                 showToast("You can't afford that bid!");
