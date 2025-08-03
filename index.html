@@ -271,7 +271,7 @@
                 <h2 class="text-xl font-semibold mb-4 text-center">Market News</h2>
                 <div id="log-list" class="space-y-2 text-sm max-h-[12vh] overflow-y-auto pr-2"></div>
             </div>
-            <div class="card p-6">
+             <div class="card p-6">
                 <h2 class="text-xl font-semibold mb-4 text-center">Transaction Log</h2>
                 <div id="transaction-log" class="space-y-2 text-sm max-h-[12vh] overflow-y-auto pr-2"></div>
             </div>
@@ -1208,6 +1208,7 @@
                     buttonHtml = `<button onclick="buyBusiness('${assetId}')" class="btn ${canAfford && hasRequiredAssets ? 'btn-primary' : 'btn-disabled'} btn-sm !py-1 !px-3" ${!(canAfford && hasRequiredAssets) ? 'disabled' : ''}>Start</button>`;
                 }
                 businessItem.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">${assetsConfig[assetId].icon} ${business.name}</p><p class="text-sm text-gray-400">Cost: ${formatCurrency(business.cost)} (Req: ${business.required} ${asset.name}s)</p></div>${buttonHtml}</div>`;
+                businessesListEl.appendChild(businessItem);
             }
             if(!hasAvailable && Object.keys(gameState.businesses).length === 0) {
                 businessesListEl.innerHTML = `<p class="text-gray-400 text-center p-4">Acquire more assets to unlock business opportunities.</p>`;
