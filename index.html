@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxe Legacy: Empire Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        .brand-gradient {
+            background: linear-gradient(to right, #ca8a04, #eab308);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .card:hover:not(.no-hover) {
+            border-color: #ca8a04;
+            transform: translateY(-2px);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .btn-primary {
+            background-color: #ca8a04;
+            color: #111827;
+        }
+        .btn-primary:hover {
+            background-color: #eab308;
+        }
+        .btn-secondary {
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .btn-danger {
+            background-color: #991b1b;
+            color: #fecaca;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+        .btn-disabled {
+            background-color: #4b5563;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .price-up { color: #22c55e; }
+        .price-down { color: #ef4444; }
+        .news-good { color: #4ade80; }
+        .news-bad { color: #f87171; }
+        .news-golden { color: #facc15; font-weight: 600; }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(17, 24, 39, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1f2937;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .avatar-choice {
+            cursor: pointer;
+            font-size: 3rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .avatar-choice.selected {
+            border-color: #ca8a04;
+            background-color: #374151;
+        }
+        .tab {
+            padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent;
+            font-weight: 500; color: #9ca3af;
+        }
+        .tab.active { border-color: #ca8a04; color: #e5e7eb; }
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ca8a04;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translate(-50%, 2rem);
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        #market-chart {
+            background-color: #111827;
+            border-radius: 0.5rem;
+        }
+        .help-button {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 3rem;
+            height: 3rem;
+            background-color: #ca8a04;
+            color: #111827;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 40;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .help-button:hover {
+            transform: scale(1.1);
+        }
+        .help-content {
+            text-align: left;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Character Creation Screen -->
+    <div id="character-screen" class="modal-overlay">
+        <div class="modal-content space-y-6">
+            <h1 class="text-3xl font-bold brand-gradient">Create Your Legacy</h1>
+            <div>
+                <label for="username-input" class="block text-sm font-medium text-gray-300 mb-2">Enter Your Name <span class="text-red-500">*</span></label>
+                <input type="text" id="username-input" placeholder="e.g., Donatella" class="w-full bg-gray-800 border border-gray-600 rounded-md p-2 text-center text-white focus:ring-yellow-500 focus:border-yellow-500 transition-colors">
+            </div>
+            <div>
+                <label for="company-name-input" class="block text-sm font-medium text-gray-300 mb-2">Company Name <span class="text-red-500">*</span></label>
+                <input type="text" id="company-name-input" placeholder="e.g., Luxe Holdings Inc." class="w-full bg-gray-800 border border-gray-600 rounded-md p-2 text-center text-white focus:ring-yellow-500 focus:border-yellow-500 transition-colors">
+            </div>
+            <div>
+                <p class="block text-sm font-medium text-gray-300 mb-2">Choose Your Avatar</p>
+                <div id="avatar-choices" class="flex justify-center gap-4">
+                    <span class="avatar-choice selected" data-avatar="💼">💼</span>
+                    <span class="avatar-choice" data-avatar="👔">👔</span>
+                    <span class="avatar-choice" data-avatar="📈">📈</span>
+                    <span class="avatar-choice" data-avatar="🏢">🏢</span>
+                </div>
+            </div>
+            <button id="start-game-btn" class="btn btn-primary w-full !mt-8">Build My Empire</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+        <!-- Left Column: Player Stats & Achievements -->
+        <div class="lg:col-span-3 space-y-6">
+            <header id="player-header" class="text-center card p-6 no-hover relative border-2"></header>
+            <div class="card p-6 text-center no-hover">
+                <h2 class="text-lg font-semibold text-gray-300">Net Worth</h2>
+                <p id="net-worth" class="text-4xl font-bold text-white">$10,000</p>
+            </div>
+             <div class="card p-6 text-center no-hover">
+                <h2 class="text-lg font-semibold text-green-400">Cash Balance</h2>
+                <p id="cash-balance" class="text-3xl font-bold text-green-400">$10,000</p>
+                <p id="passive-income-display" class="text-sm text-green-400 mt-1 h-5"></p>
+            </div>
+            <div class="card p-6 text-center no-hover">
+                <h2 class="text-lg font-semibold text-red-400">Taxes Paid</h2>
+                <p id="taxes-paid" class="text-2xl font-bold text-red-400">$0</p>
+            </div>
+            <div class="card p-6">
+                 <h2 class="text-xl font-semibold mb-4 text-center">Side Hustle</h2>
+                 <div class="mb-4">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-300">Next Upgrade</span>
+                        <span id="clicker-progress-text" class="text-sm font-medium text-gray-300">0 / 50</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                        <div id="clicker-progress-bar" class="bg-yellow-400 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                 </div>
+                 <button id="clicker-btn" class="btn btn-primary w-full">Earn $1</button>
+            </div>
+            <div class="card p-6">
+                 <h2 class="text-xl font-semibold mb-4 text-center">Consulting Gig</h2>
+                 <button id="consulting-btn" class="btn btn-primary w-full">Take Gig</button>
+            </div>
+            <div class="card p-6">
+                 <h2 class="text-xl font-semibold mb-4 text-center">Achievements</h2>
+                <div id="achievements-list" class="space-y-4 max-h-[15vh] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+
+        <!-- Center Column: Marketplace -->
+        <div class="lg:col-span-5 space-y-6">
+             <div class="card p-6 h-full">
+                <h2 class="text-xl font-semibold mb-4 text-center">Marketplace</h2>
+                <div id="marketplace-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[80vh] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+
+        <!-- Right Column: Portfolio, Businesses, News -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="card p-6">
+                <div class="flex border-b border-gray-700">
+                    <div id="tab-portfolio" class="tab active">Portfolio</div>
+                    <div id="tab-businesses" class="tab">Businesses</div>
+                    <div id="tab-skills" class="tab">Skills</div>
+                </div>
+                <div id="portfolio-list" class="mt-4 space-y-4 max-h-[28vh] overflow-y-auto pr-2"></div>
+                <div id="businesses-list" class="mt-4 space-y-4 max-h-[28vh] overflow-y-auto pr-2 hidden"></div>
+                <div id="skills-list" class="mt-4 space-y-4 max-h-[28vh] overflow-y-auto pr-2 hidden"></div>
+            </div>
+             <div class="card p-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Market Index</h2>
+                <canvas id="market-chart" width="400" height="100"></canvas>
+                <div class="mt-2 text-center">
+                    <p class="font-bold text-lg" id="index-price">Loading...</p>
+                    <p class="text-sm text-gray-400">Luxe 14 Index</p>
+                </div>
+                <div class="flex gap-4 mt-2">
+                    <button id="buy-index-btn" class="btn btn-primary w-full !py-2">Buy</button>
+                    <button id="sell-index-btn" class="btn btn-secondary w-full !py-2">Sell</button>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Market News</h2>
+                <div id="log-list" class="space-y-2 text-sm max-h-[15vh] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="win-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold brand-gradient mb-4">Ultimate Victory!</h2>
+            <p class="text-gray-300 mb-6">You have achieved the impossible and reached a net worth of over **$1 Quadrillion**. Your legacy is eternal. What's next?</p>
+            <div class="flex justify-center gap-4">
+                <button id="continue-playing-btn" class="btn btn-secondary">Keep Playing</button>
+                <button id="end-game-btn" class="btn btn-primary">End Game</button>
+            </div>
+        </div>
+    </div>
+    <div id="reset-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-white mb-4">Reset Game?</h2>
+            <p class="text-gray-300 mb-6">Are you sure you want to start over? All your progress will be permanently deleted.</p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-reset-btn" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-reset-btn" class="btn btn-danger">Confirm Reset</button>
+            </div>
+        </div>
+    </div>
+    <div id="auction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-3xl font-bold brand-gradient mb-4">Rare Auction!</h2>
+            <div id="auction-item-display" class="mb-4"></div>
+            <p class="text-lg">Current Bid: <span id="auction-current-bid" class="font-bold text-yellow-400"></span></p>
+            <p class="text-sm text-gray-400 mb-4">Highest Bidder: <span id="auction-highest-bidder"></span></p>
+            <div class="w-full bg-gray-700 rounded-full h-2.5 mb-4">
+                <div id="auction-timer-bar" class="bg-yellow-400 h-2.5 rounded-full" style="width: 100%"></div>
+            </div>
+            <div class="flex gap-4">
+                <button id="auction-pass-btn" class="btn btn-secondary w-full">Pass</button>
+                <button id="auction-bid-btn" class="btn btn-primary w-full">Place Bid</button>
+            </div>
+        </div>
+    </div>
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-content">
+             <h2 class="text-3xl font-bold brand-gradient mb-4">How to Play</h2>
+             <div class="help-content space-y-4">
+                <div>
+                    <h3 class="font-bold text-lg text-yellow-400">The Goal</h3>
+                    <p class="text-sm">Become a Quadrillionaire! Grow your net worth from $10,000 to $1,000,000,000,000,000 by buying and selling luxury assets.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-yellow-400">Core Mechanics</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <li>**Marketplace:** Buy and sell assets. Prices fluctuate constantly. Buy low, sell high!</li>
+                        <li>**Portfolio:** View your current holdings, the average price you paid, and their current market value.</li>
+                        <li>**Businesses:** Once you own enough of a certain asset, you can start a business to generate passive income every few seconds.</li>
+                        <li>**Market Index:** Invest in the entire market at once by buying shares of the Luxe 14 Index. A safer, more diversified investment.</li>
+                        <li>**Capital Gains Tax:** A 20% tax is applied to all profits you make from selling assets. Plan your sales carefully!</li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 class="font-bold text-lg text-yellow-400">Making Money</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <li>**Side Hustle:** Click the "Earn" button to get extra cash. The more you click, the more the payout increases over time.</li>
+                        <li>**Consulting Gigs:** Take on high-paying gigs for a large cash injection based on your net worth. These have a 60-second cooldown.</li>
+                        <li>**Skills:** Purchase permanent upgrades to increase your income and reduce costs.</li>
+                        <li>**Auctions:** Occasionally, a rare item will go up for auction. Bid against rivals to win unique collectibles that can be sold for a massive profit.</li>
+                    </ul>
+                </div>
+             </div>
+             <button id="help-close-btn" class="btn btn-primary w-full mt-6">Got It</button>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+    <div id="help-button" class="help-button">?</div>
+
+    <script>
+        // --- GAME STATE & CONFIG ---
+        const initialGameState = {
+            playerName: 'Tycoon', playerAvatar: '💼', companyName: 'Legacy Inc.', cash: 10000,
+            portfolio: {}, businesses: {}, achievements: [], netWorth: 10000,
+            passiveIncome: 0, 
+            clickerLevel: 1, 
+            clicksTowardsNextLevel: 0,
+            clickerMultiplier: 1,
+            consultingCooldown: 0,
+            skills: { negotiation: 0, marketing: 0, hustler: 0 },
+            totalTaxesPaid: 0,
+            indexShares: 0, indexTotalCost: 0, marketHistory: [],
+        };
+        let gameState = { ...initialGameState };
+
+        const gameConfig = {
+            gameSpeed: 2000,
+            winCondition: 1000000000000000, // $1 Quadrillion
+            saveKey: 'luxeLegacySaveData',
+            marketHistoryLength: 50,
+            clickerTiers: {
+                1: { nextLevel: 5, clicksNeeded: 50 },
+                5: { nextLevel: 10, clicksNeeded: 100 },
+                10: { nextLevel: 20, clicksNeeded: 250 },
+                20: { nextLevel: 50, clicksNeeded: 1000 },
+                50: { nextLevel: null, clicksNeeded: Infinity } // Max level
+            },
+            consultingBaseCooldown: 60, // in seconds
+            capitalGainsTaxRate: 0.20,
+        };
+
+        const statusTiers = {
+            bronze: { threshold: 0, name: 'Bronze', color: '#cd7f32' },
+            silver: { threshold: 100000, name: 'Silver', color: '#c0c0c0' },
+            gold: { threshold: 1000000, name: 'Gold', color: '#ffd700' },
+            platinum: { threshold: 50000000, name: 'Platinum', color: '#e5e4e2' },
+            diamond: { threshold: 500000000, name: 'Diamond', color: '#b9f2ff' },
+            emerald: { threshold: 1000000000, name: 'Emerald', color: '#50c878' },
+            ruby: { threshold: 400000000000, name: 'Ruby', color: '#e0115f' },
+        };
+
+        const skillsConfig = {
+            negotiation: { name: "Negotiation Skills", description: "Reduce asset purchase prices by 1% per level.", maxLevel: 10, cost: (level) => 100000 * Math.pow(5, level) },
+            marketing: { name: "Marketing Genius", description: "Increase all business income by 5% per level.", maxLevel: 10, cost: (level) => 500000 * Math.pow(5, level) },
+            hustler: { name: "Efficient Hustler", description: "Increase Side Hustle income by 10% per level.", maxLevel: 10, cost: (level) => 10000 * Math.pow(4, level) },
+        };
+
+        const assetsConfig = {
+            sunglasses: { name: 'Designer Sunglasses', basePrice: 500, maxPrice: 3000, volatility: 0.25, icon: '🕶️' },
+            wallet: { name: 'Fine Leather Wallet', basePrice: 1200, maxPrice: 6000, volatility: 0.28, icon: '👝' },
+            watch: { name: 'Swiss Tourbillon', basePrice: 8000, maxPrice: 40000, volatility: 0.3, icon: '⌚',
+                business: { name: 'Boutique Reseller', cost: 60000, required: 5, income: 150 } },
+            gown: { name: 'Haute Couture Gown', basePrice: 15000, maxPrice: 75000, volatility: 0.35, icon: '👗', unlock: 50000 },
+            car: { name: 'Hypercar', basePrice: 300000, maxPrice: 1200000, volatility: 0.4, icon: '🏎️', unlock: 150000,
+                business: { name: 'Luxury Car Rental', cost: 1200000, required: 3, income: 1800 } },
+            art: { name: 'Blue-Chip Artwork', basePrice: 600000, maxPrice: 7500000, volatility: 0.5, icon: '🖼️', unlock: 750000,
+                business: { name: 'Art Gallery', cost: 3000000, required: 2, income: 6000 } },
+            vineyard: { name: 'Vineyard Estate', basePrice: 2500000, maxPrice: 12000000, volatility: 0.25, icon: '🍇', unlock: 10000000,
+                business: { name: 'Fine Wine Production', cost: 5000000, required: 1, income: 10000 } },
+            yacht: { name: 'Superyacht', basePrice: 12000000, maxPrice: 40000000, volatility: 0.45, icon: '🛥️', unlock: 25000000,
+                business: { name: 'Yacht Charters', cost: 50000000, required: 1, income: 50000 } },
+            jet: { name: 'Private Jet', basePrice: 20000000, maxPrice: 60000000, volatility: 0.4, icon: '✈️', unlock: 75000000,
+                business: { name: 'Private Charter Service', cost: 30000000, required: 1, income: 75000 } },
+            real_estate: { name: 'Penthouse Suite', basePrice: 50000000, maxPrice: 180000000, volatility: 0.35, icon: '🏢', unlock: 100000000 },
+            private_island: { name: 'Private Island', basePrice: 250000000, maxPrice: 750000000, volatility: 0.2, icon: '🏝️', unlock: 500000000,
+                business: { name: 'Exclusive Resort', cost: 1000000000, required: 1, income: 500000 } },
+            movie_studio: { name: 'Movie Studio', basePrice: 800000000, maxPrice: 3000000000, volatility: 0.5, icon: '🎬', unlock: 2000000000,
+                business: { name: 'Blockbuster Productions', cost: 2000000000, required: 1, income: 1200000 } },
+            sports_franchise: { name: 'Sports Franchise', basePrice: 4000000000, maxPrice: 10000000000, volatility: 0.3, icon: '🏟️', unlock: 8000000000,
+                business: { name: 'Championship Dynasty', cost: 5000000000, required: 1, income: 5000000 } },
+            space_company: { name: 'Space Exploration Co.', basePrice: 15000000000, maxPrice: 50000000000, volatility: 0.6, icon: '🚀', unlock: 25000000000,
+                business: { name: 'Galactic Ventures', cost: 10000000000, required: 1, income: 20000000 } },
+        };
+        
+        const rareItemsConfig = {
+            legendary_car: { name: "1962 Ferrari 250 GTO", icon: "🚗", basePrice: 20000000, description: "One of only 36 ever made. A true collector's dream.", resaleMultiplier: 1.5 },
+            crown_jewel: { name: "The Regent Diamond", icon: "💎", basePrice: 50000000, description: "A flawless diamond with a royal history.", resaleMultiplier: 1.8 },
+            first_edition_book: { name: "Shakespeare's First Folio", icon: "📖", basePrice: 10000000, description: "A cornerstone of Western literature.", resaleMultiplier: 2.0 },
+        };
+
+        const eventsConfig = [
+            // Good Events
+            { title: "Summer Heatwave!", description: "Designer Sunglasses are flying off the shelves.", type: 'good', effect: { target: 'sunglasses', multiplier: 2.5, duration: 4 } },
+            { title: "New Leather Tannery!", description: "A new supplier has increased the quality of Fine Leather Wallets.", type: 'good', effect: { target: 'wallet', multiplier: 1.8, duration: 3 } },
+            { title: "Celebrity Endorsement!", description: "A-lister seen with a Swiss Tourbillon, prices soar.", type: 'good', effect: { target: 'watch', multiplier: 1.9, duration: 4 } },
+            { title: "Met Gala Mania!", description: "Haute Couture Gowns are the hot item.", type: 'good', effect: { target: 'gown', multiplier: 2.0, duration: 4 } },
+            { title: "Tech Billionaire Buys Fleet!", description: "A tech mogul buys a fleet of Hypercars, driving up demand.", type: 'good', effect: { target: 'car', multiplier: 1.6, duration: 3 } },
+            { title: "Art Heist!", description: "A famous painting is stolen, increasing demand for secure artwork.", type: 'good', effect: { target: 'art', multiplier: 1.8, duration: 3 } },
+            { title: "Vintage Wine Auction Record!", description: "A record-breaking auction has boosted the value of Vineyard Estates.", type: 'good', effect: { target: 'vineyard', multiplier: 1.4, duration: 5 } },
+            { title: "Luxury Travel Boom!", description: "Demand for private jets and yachts is at an all-time high.", type: 'good', effect: { target: ['jet', 'yacht'], multiplier: 1.5, duration: 4 } },
+            { title: "Urban Redevelopment!", description: "City revitalization has boosted Penthouse Suite values.", type: 'good', effect: { target: 'real_estate', multiplier: 1.3, duration: 6 } },
+            { title: "Blockbuster Hit!", description: "Your Movie Studio produced a record-breaking film.", type: 'good', effect: { target: 'movie_studio', multiplier: 1.5, duration: 5 } },
+            { title: "Championship Victory!", description: "Your Sports Franchise won the finals!", type: 'good', effect: { target: 'sports_franchise', multiplier: 1.6, duration: 4 } },
+            { title: "Successful Launch!", description: "Your Space Exploration Co. successfully launched a rocket.", type: 'good', effect: { target: 'space_company', multiplier: 1.8, duration: 3 } },
+            
+            // Bad Events
+            { title: "Knockoff Market Flooded!", description: "A wave of convincing fakes has hurt the sunglasses market.", type: 'bad', effect: { target: 'sunglasses', multiplier: 0.4, duration: 4 } },
+            { title: "Vegan Leather Trend!", description: "A trend towards vegan materials has decreased demand for leather wallets.", type: 'bad', effect: { target: 'wallet', multiplier: 0.6, duration: 5 } },
+            { title: "Smartwatch Craze!", description: "The latest tech gadget is making traditional watches seem obsolete.", type: 'bad', effect: { target: 'watch', multiplier: 0.7, duration: 3 } },
+            { title: "Fast Fashion Backlash!", description: "A movement against fast fashion has hurt the couture market.", type: 'bad', effect: { target: 'gown', multiplier: 0.6, duration: 4 } },
+            { title: "New Emissions Tax!", description: "A new tax on high-performance engines has hit the Hypercar market.", type: 'bad', effect: { target: 'car', multiplier: 0.75, duration: 4 } },
+            { title: "Masterpiece Forgery Scandal!", description: "A widespread forgery scandal has shaken the art world.", type: 'bad', effect: { target: 'art', multiplier: 0.5, duration: 4 } },
+            { title: "Poor Harvest!", description: "A bad year for grapes has negatively impacted Vineyard Estates.", type: 'bad', effect: { target: 'vineyard', multiplier: 0.6, duration: 5 } },
+            { title: "Fuel Price Spike!", description: "Operating costs for private jets and yachts have skyrocketed.", type: 'bad', effect: { target: ['jet', 'yacht'], multiplier: 0.7, duration: 3 } },
+            { title: "Housing Market Crash!", description: "A bubble has burst, causing Penthouse Suite values to plummet.", type: 'bad', effect: { target: 'real_estate', multiplier: 0.6, duration: 6 } },
+            { title: "Movie Flop!", description: "Your studio's latest film was a critical and commercial failure.", type: 'bad', effect: { target: 'movie_studio', multiplier: 0.5, duration: 5 } },
+            { title: "Team Scandal!", description: "A major scandal has rocked your Sports Franchise.", type: 'bad', effect: { target: 'sports_franchise', multiplier: 0.6, duration: 4 } },
+            { title: "Launch Failure!", description: "A rocket from your Space Exploration Co. exploded on the launchpad.", type: 'bad', effect: { target: 'space_company', multiplier: 0.4, duration: 3 } },
+            
+            // Special Golden Event
+            { title: "Hustle Pays Off!", description: "Your side hustle is booming! Your clicks are worth double for a limited time.", type: 'golden', effect: { target: 'clicker', multiplier: 2, duration: 15 } },
+        ];
+
+        const achievementsConfig = {
+            millionaire: { title: "Millionaire's Club", description: "Reach a net worth of $1,000,000.", condition: (gs) => gs.netWorth >= 1000000 },
+            watchCollector: { title: "Time Keeper", description: "Own 5 Swiss Tourbillons.", condition: (gs) => gs.portfolio.watch?.quantity >= 5 },
+            watchHoarder: { title: "Watch Hoarder", description: "Own 500 Swiss Tourbillons.", condition: (gs) => gs.portfolio.watch?.quantity >= 500 },
+            firstBusiness: { title: "Entrepreneur", description: "Start your first business.", condition: (gs) => Object.keys(gs.businesses).length > 0 },
+            carFleet: { title: "Car Connoisseur", description: "Own 3 Hypercars.", condition: (gs) => gs.portfolio.car?.quantity >= 3 },
+            artMogul: { title: "Art Mogul", description: "Own an Art Gallery business.", condition: (gs) => gs.businesses.art },
+            collector: { title: "The Collector", description: "Win a rare item from an auction.", condition: (gs) => Object.keys(gs.portfolio).some(key => gs.portfolio[key].unique) },
+            corporateLadder: { title: "Corporate Ladder", description: "Own all possible businesses.", condition: (gs) => Object.keys(gs.businesses).length === Object.values(assetsConfig).filter(a => a.business).length },
+            islandOwner: { title: "Island Owner", description: "Acquire a Private Island.", condition: (gs) => gs.portfolio.private_island?.quantity > 0 },
+            movieMogul: { title: "Movie Mogul", description: "Own a Movie Studio.", condition: (gs) => gs.portfolio.movie_studio?.quantity > 0 },
+            teamOwner: { title: "Franchise Owner", description: "Acquire a Sports Franchise.", condition: (gs) => gs.portfolio.sports_franchise?.quantity > 0 },
+            rocketMan: { title: "To the Moon!", description: "Found a Space Exploration Co.", condition: (gs) => gs.portfolio.space_company?.quantity > 0 },
+            billionaire: { title: "Billionaire", description: "Reach a net worth of $1,000,000,000.", condition: (gs) => gs.netWorth >= 1000000000 },
+            trillionaire: { title: "Trillionaire", description: "Reach a net worth of $1,000,000,000,000.", condition: (gs) => gs.netWorth >= 1000000000000 },
+            quadrillionaire: { title: "Quadrillionaire", description: "Reach a net worth of $1,000,000,000,000,000.", condition: (gs) => gs.netWorth >= gameConfig.winCondition },
+        };
+
+        let activeEvent = null;
+        let gameLoop, auctionInterval;
+        let marketCycle = { state: 'Normal', duration: 0, bias: 0.0 };
+        let currentMarketAverage = 0;
+        let auctionState = { active: false };
+
+        // --- DOM ELEMENTS ---
+        const getEl = (id) => document.getElementById(id);
+        const characterScreenEl = getEl('character-screen'), usernameInputEl = getEl('username-input'),
+              companyNameInputEl = getEl('company-name-input'),
+              avatarChoicesEl = getEl('avatar-choices'), startGameBtnEl = getEl('start-game-btn'),
+              gameContainerEl = getEl('game-container'), playerHeaderEl = getEl('player-header'),
+              cashBalanceEl = getEl('cash-balance'), netWorthEl = getEl('net-worth'),
+              portfolioListEl = getEl('portfolio-list'), marketplaceListEl = getEl('marketplace-list'),
+              logListEl = getEl('log-list'), winModalEl = getEl('win-modal'), toastEl = getEl('toast'),
+              businessesListEl = getEl('businesses-list'), achievementsListEl = getEl('achievements-list'),
+              skillsListEl = getEl('skills-list'),
+              passiveIncomeDisplayEl = getEl('passive-income-display'), resetModalEl = getEl('reset-modal'),
+              cancelResetBtn = getEl('cancel-reset-btn'), confirmResetBtn = getEl('confirm-reset-btn'),
+              clickerBtn = getEl('clicker-btn'), marketChartEl = getEl('market-chart'),
+              indexPriceEl = getEl('index-price'), buyIndexBtn = getEl('buy-index-btn'),
+              sellIndexBtn = getEl('sell-index-btn'), auctionModalEl = getEl('auction-modal'),
+              auctionItemDisplayEl = getEl('auction-item-display'), auctionCurrentBidEl = getEl('auction-current-bid'),
+              auctionHighestBidderEl = getEl('auction-highest-bidder'), auctionTimerBarEl = getEl('auction-timer-bar'),
+              auctionBidBtn = getEl('auction-bid-btn'), auctionPassBtn = getEl('auction-pass-btn'),
+              clickerProgressBar = getEl('clicker-progress-bar'), clickerProgressText = getEl('clicker-progress-text'),
+              continuePlayingBtn = getEl('continue-playing-btn'), endGameBtn = getEl('end-game-btn'),
+              consultingBtn = getEl('consulting-btn'), helpButton = getEl('help-button'),
+              helpModal = getEl('help-modal'), helpCloseBtn = getEl('help-close-btn'),
+              taxesPaidEl = getEl('taxes-paid');
+
+        // --- CORE LOGIC ---
+        const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        
+        function saveGame() {
+            try {
+                const stateToSave = {...gameState};
+                delete stateToSave.marketHistory; // Don't save the chart history
+                localStorage.setItem(gameConfig.saveKey, JSON.stringify(stateToSave));
+            } catch (e) {
+                console.error("Failed to save game:", e);
+                showToast("Error: Could not save progress.");
+            }
+        }
+
+        function loadGame() {
+            const savedData = localStorage.getItem(gameConfig.saveKey);
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    gameState = { ...initialGameState, ...parsedData, marketHistory: [] }; // Reset history on load
+                    return true;
+                } catch (e) {
+                    console.error("Error loading saved data:", e);
+                    localStorage.removeItem(gameConfig.saveKey);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function resetGame(isWin = false) {
+            if (isWin) {
+                localStorage.removeItem(gameConfig.saveKey);
+                window.location.reload();
+            } else {
+                resetModalEl.classList.add('visible');
+            }
+        }
+
+        function buyAsset(assetId) {
+            const asset = assetsConfig[assetId];
+            const priceMultiplier = 1 - (gameState.skills.negotiation * 0.01);
+            const finalPrice = asset.currentPrice * priceMultiplier;
+
+            if (gameState.cash >= finalPrice) {
+                gameState.cash -= finalPrice;
+                if (!gameState.portfolio[assetId]) {
+                    gameState.portfolio[assetId] = { quantity: 0, totalCost: 0 };
+                }
+                gameState.portfolio[assetId].quantity++;
+                gameState.portfolio[assetId].totalCost += finalPrice;
+                addLog(`Purchased ${asset.name} for ${formatCurrency(finalPrice)}.`, 'buy');
+                updateUI();
+            }
+        }
+
+        function sellAsset(assetId, isUnique = false) {
+            if (isUnique) {
+                const item = gameState.portfolio[assetId];
+                const salePrice = item.totalCost * item.resaleMultiplier;
+                gameState.cash += salePrice;
+                addLog(`Sold the ${item.name} for ${formatCurrency(salePrice)}!`, 'sell');
+                delete gameState.portfolio[assetId];
+                updateUI();
+                return;
+            }
+
+            const asset = assetsConfig[assetId];
+            if (gameState.portfolio[assetId]?.quantity > 0) {
+                const avgCost = gameState.portfolio[assetId].totalCost / gameState.portfolio[assetId].quantity;
+                const profit = asset.currentPrice - avgCost;
+                let salePrice = asset.currentPrice;
+
+                if (profit > 0) {
+                    const tax = profit * gameConfig.capitalGainsTaxRate;
+                    salePrice -= tax;
+                    gameState.totalTaxesPaid += tax;
+                    showToast(`Paid ${formatCurrency(tax)} in capital gains tax.`);
+                }
+                
+                gameState.cash += salePrice;
+                gameState.portfolio[assetId].totalCost -= avgCost;
+                gameState.portfolio[assetId].quantity--;
+
+                addLog(`Sold ${asset.name} for ${formatCurrency(asset.currentPrice)}.`, 'sell');
+                if (gameState.portfolio[assetId].quantity === 0) {
+                    delete gameState.portfolio[assetId];
+                }
+                updateUI();
+            }
+        }
+
+        function sellAllAssets(assetId) {
+            const holding = gameState.portfolio[assetId];
+            if (!holding || holding.quantity === 0) return;
+            
+            const asset = assetsConfig[assetId];
+            const avgCostPerItem = holding.totalCost / holding.quantity;
+            const profitPerItem = asset.currentPrice - avgCostPerItem;
+            let totalSaleValue = holding.quantity * asset.currentPrice;
+
+            if (profitPerItem > 0) {
+                const totalProfit = profitPerItem * holding.quantity;
+                const tax = totalProfit * gameConfig.capitalGainsTaxRate;
+                totalSaleValue -= tax;
+                gameState.totalTaxesPaid += tax;
+                showToast(`Paid ${formatCurrency(tax)} in capital gains tax.`);
+            }
+
+            gameState.cash += totalSaleValue;
+            addLog(`Sold all ${holding.quantity} ${asset.name} for ${formatCurrency(totalSaleValue)}.`, 'sell');
+            delete gameState.portfolio[assetId];
+            updateUI();
+        }
+
+        function buyBusiness(assetId) {
+            const business = assetsConfig[assetId].business;
+            const hasEnoughAssets = gameState.portfolio[assetId]?.quantity >= business.required;
+            if (gameState.cash >= business.cost && hasEnoughAssets && !gameState.businesses[assetId]) {
+                gameState.cash -= business.cost;
+                gameState.businesses[assetId] = { name: business.name, income: business.income };
+                addLog(`Started a ${business.name} business!`, 'business');
+                updateUI();
+            }
+        }
+
+        function handleManualClick() {
+            const clickValue = gameState.clickerLevel * (1 + gameState.skills.hustler * 0.1);
+            gameState.cash += clickValue * gameState.clickerMultiplier;
+            gameState.clicksTowardsNextLevel++;
+
+            const currentTier = gameConfig.clickerTiers[gameState.clickerLevel];
+            if (currentTier && currentTier.nextLevel && gameState.clicksTowardsNextLevel >= currentTier.clicksNeeded) {
+                gameState.clickerLevel = currentTier.nextLevel;
+                gameState.clicksTowardsNextLevel = 0;
+                showToast(`Side Hustle upgraded! You now earn ${formatCurrency(gameState.clickerLevel)} per click.`);
+            }
+            
+            cashBalanceEl.textContent = formatCurrency(gameState.cash);
+            netWorthEl.textContent = formatCurrency(gameState.netWorth + (clickValue * gameState.clickerMultiplier)); 
+            renderSideHustle();
+        }
+
+        function handleConsultingGig() {
+            if (gameState.consultingCooldown > 0) return;
+
+            const reward = gameState.netWorth * 0.01;
+            gameState.cash += reward;
+            gameState.consultingCooldown = gameConfig.consultingBaseCooldown;
+            addLog(`Completed a consulting gig for ${formatCurrency(reward)}!`, 'income');
+            updateUI();
+        }
+
+        function buyIndexShare() {
+            if (gameState.cash >= currentMarketAverage) {
+                gameState.cash -= currentMarketAverage;
+                gameState.indexTotalCost += currentMarketAverage;
+                gameState.indexShares++;
+                addLog(`Bought 1 Luxe 14 Index share for ${formatCurrency(currentMarketAverage)}.`, 'buy');
+                updateUI();
+            }
+        }
+
+        function sellIndexShare() {
+            if (gameState.indexShares > 0) {
+                const avgCost = gameState.indexTotalCost / gameState.indexShares;
+                const profit = currentMarketAverage - avgCost;
+                let salePrice = currentMarketAverage;
+
+                if (profit > 0) {
+                    const tax = profit * gameConfig.capitalGainsTaxRate;
+                    salePrice -= tax;
+                    gameState.totalTaxesPaid += tax;
+                    showToast(`Paid ${formatCurrency(tax)} in capital gains tax.`);
+                }
+
+                gameState.cash += salePrice;
+                gameState.indexTotalCost -= avgCost;
+                gameState.indexShares--;
+                addLog(`Sold 1 Luxe 14 Index share for ${formatCurrency(currentMarketAverage)}.`, 'sell');
+                updateUI();
+            }
+        }
+        
+        function sellAllIndexShares() {
+            if (gameState.indexShares > 0) {
+                const avgCost = gameState.indexTotalCost / gameState.indexShares;
+                const profitPerShare = currentMarketAverage - avgCost;
+                let totalValue = gameState.indexShares * currentMarketAverage;
+
+                if (profitPerShare > 0) {
+                    const totalProfit = profitPerShare * gameState.indexShares;
+                    const tax = totalProfit * gameConfig.capitalGainsTaxRate;
+                    totalValue -= tax;
+                    gameState.totalTaxesPaid += tax;
+                    showToast(`Paid ${formatCurrency(tax)} in capital gains tax.`);
+                }
+
+                gameState.cash += totalValue;
+                addLog(`Sold all ${gameState.indexShares} Luxe 14 Index shares for ${formatCurrency(totalValue)}.`, 'sell');
+                gameState.indexShares = 0;
+                gameState.indexTotalCost = 0;
+                updateUI();
+            }
+        }
+
+        function buySkill(skillId) {
+            const skill = skillsConfig[skillId];
+            const currentLevel = gameState.skills[skillId];
+            if (currentLevel >= skill.maxLevel) return;
+
+            const cost = skill.cost(currentLevel);
+            if (gameState.cash >= cost) {
+                gameState.cash -= cost;
+                gameState.skills[skillId]++;
+                addLog(`Upgraded ${skill.name} to Level ${gameState.skills[skillId]}!`, 'achievement');
+                updateUI();
+            }
+        }
+
+        function updateMarket() {
+            // Update Cooldowns
+            if (gameState.consultingCooldown > 0) {
+                gameState.consultingCooldown -= gameConfig.gameSpeed / 1000;
+            }
+
+            // Update Market Cycle
+            if (marketCycle.duration > 0) {
+                marketCycle.duration--;
+                if (marketCycle.duration === 0) {
+                    addLog(`The market is returning to normal after the ${marketCycle.state}.`, 'event');
+                    marketCycle.state = 'Normal';
+                    marketCycle.bias = 0.0;
+                }
+            } else if (Math.random() < 0.05) {
+                if (Math.random() > 0.5) {
+                    marketCycle = { state: 'Boom', duration: Math.floor(Math.random() * 10) + 15, bias: 0.04 };
+                    addLog(`Economic Forecast: A market boom is beginning! Prices are likely to rise.`, 'event', 'good');
+                } else {
+                    marketCycle = { state: 'Bust', duration: Math.floor(Math.random() * 10) + 15, bias: -0.04 };
+                    addLog(`Economic Forecast: A recession is looming! Prices are likely to fall.`, 'event', 'bad');
+                }
+            }
+
+            // Handle specific news events
+            if (activeEvent) {
+                activeEvent.duration--;
+                if (activeEvent.duration <= 0) {
+                    if (activeEvent.effect.target === 'clicker') {
+                        gameState.clickerMultiplier = 1;
+                    }
+                    activeEvent = null;
+                }
+            } else if (Math.random() < 0.12) { // Slightly increased chance for any event
+                triggerEvent();
+            }
+
+            // Handle auction trigger
+            if (!auctionState.active && gameState.netWorth > 10000000 && Math.random() < 0.03) {
+                triggerAuction();
+            }
+
+            // Price updates
+            let totalMarketValue = 0;
+            const assetCount = Object.keys(assetsConfig).length;
+            for (const assetId in assetsConfig) {
+                const asset = assetsConfig[assetId];
+                if (asset.unlock && gameState.netWorth < asset.unlock) {
+                    totalMarketValue += asset.currentPrice;
+                    continue;
+                };
+                
+                let priceStep = 0;
+                if (asset.targetPrice && asset.transitionTicks > 0) {
+                    const difference = asset.targetPrice - asset.currentPrice;
+                    priceStep = difference / asset.transitionTicks;
+                    asset.transitionTicks--;
+                    if (asset.transitionTicks <= 0) {
+                        asset.targetPrice = null;
+                    }
+                }
+
+                const randomFluctuation = ((Math.random() - 0.5) * 2) * asset.volatility + marketCycle.bias;
+                const oldPrice = asset.currentPrice;
+                let newPrice = oldPrice * (1 + randomFluctuation) + priceStep;
+                
+                newPrice = Math.max(asset.basePrice * 0.2, newPrice);
+                if (asset.maxPrice) {
+                    newPrice = Math.min(newPrice, asset.maxPrice);
+                }
+
+                asset.priceChange = newPrice - oldPrice;
+                asset.currentPrice = newPrice;
+                totalMarketValue += newPrice;
+            }
+            
+            // Update Market Index
+            currentMarketAverage = totalMarketValue / assetCount;
+            gameState.marketHistory.push(currentMarketAverage);
+            if (gameState.marketHistory.length > gameConfig.marketHistoryLength) {
+                gameState.marketHistory.shift();
+            }
+
+            // Passive Income
+            const incomeMultiplier = 1 + (gameState.skills.marketing * 0.05);
+            gameState.passiveIncome = Object.values(gameState.businesses).reduce((sum, b) => sum + b.income, 0) * incomeMultiplier;
+            if(gameState.passiveIncome > 0) {
+                gameState.cash += gameState.passiveIncome;
+                addLog(`Earned ${formatCurrency(gameState.passiveIncome)} from businesses.`, 'income');
+            }
+            updateUI();
+        }
+
+        function triggerEvent() {
+            activeEvent = { ...eventsConfig[Math.floor(Math.random() * eventsConfig.length)] };
+            addLog(`NEWS: ${activeEvent.description}`, 'event', activeEvent.type);
+            showToast(`Breaking News: ${activeEvent.title}`);
+
+            const targets = Array.isArray(activeEvent.effect.target) ? activeEvent.effect.target : [activeEvent.effect.target];
+            targets.forEach(targetId => {
+                if (targetId === 'clicker') {
+                     gameState.clickerMultiplier = activeEvent.effect.multiplier;
+                } else if (assetsConfig[targetId]) {
+                    const asset = assetsConfig[targetId];
+                    asset.targetPrice = asset.currentPrice * activeEvent.effect.multiplier;
+                    asset.transitionTicks = activeEvent.effect.duration;
+                }
+            });
+        }
+
+        function calculateNetWorth() {
+            const portfolioValue = Object.entries(gameState.portfolio).reduce((sum, [id, holding]) => {
+                if (holding.unique) {
+                    return sum + (holding.totalCost * holding.resaleMultiplier);
+                }
+                return sum + (holding.quantity * assetsConfig[id].currentPrice);
+            }, 0);
+            const businessValue = Object.keys(gameState.businesses).reduce((sum, id) => sum + (assetsConfig[id]?.business?.cost || 0), 0);
+            const indexValue = gameState.indexShares * currentMarketAverage;
+            gameState.netWorth = gameState.cash + portfolioValue + businessValue + indexValue;
+            if (gameState.netWorth >= gameConfig.winCondition && !gameState.achievements.includes('quadrillionaire')) {
+                winGame();
+            }
+        }
+        
+        function checkAchievements() {
+            for (const id in achievementsConfig) {
+                if (!gameState.achievements.includes(id)) {
+                    if (achievementsConfig[id].condition(gameState)) {
+                        gameState.achievements.push(id);
+                        showToast(`🏆 Achievement Unlocked: ${achievementsConfig[id].title}`);
+                        addLog(`🏆 Unlocked: ${achievementsConfig[id].title}`, 'achievement');
+                    }
+                }
+            }
+        }
+
+        function addLog(message, type, subType = '') {
+            const icons = { buy: '🟢', sell: '🔴', market: '📈', event: '⚡️', business: '💼', income: '💰', achievement: '🏆' };
+            const logItem = document.createElement('p');
+            if (type === 'event') {
+                if (subType === 'good') logItem.classList.add('news-good');
+                if (subType === 'bad') logItem.classList.add('news-bad');
+                if (subType === 'golden') logItem.classList.add('news-golden');
+            }
+            logItem.innerHTML = `${icons[type] || '➡️'} ${message}`;
+            logListEl.prepend(logItem);
+            if (logListEl.children.length > 50) logListEl.removeChild(logListEl.lastChild);
+        }
+
+        // --- AUCTION LOGIC ---
+        function triggerAuction() {
+            const itemKeys = Object.keys(rareItemsConfig);
+            const randomKey = itemKeys[Math.floor(Math.random() * itemKeys.length)];
+            const item = rareItemsConfig[randomKey];
+
+            auctionState = {
+                active: true,
+                itemId: randomKey,
+                item: item,
+                currentBid: item.basePrice,
+                highestBidder: 'Starting Bid',
+                timer: 30,
+                maxTime: 30,
+                rivals: [
+                    { name: 'Baron von Rich', cash: gameState.netWorth * (0.8 + Math.random() * 0.4), aggression: 0.6 },
+                    { name: 'Lady Sterling', cash: gameState.netWorth * (0.9 + Math.random() * 0.4), aggression: 0.4 }
+                ]
+            };
+            
+            updateAuctionUI();
+            auctionModalEl.classList.add('visible');
+            auctionInterval = setInterval(auctionTick, 1000);
+        }
+
+        function auctionTick() {
+            auctionState.timer--;
+
+            // Rival bidding logic
+            auctionState.rivals.forEach(rival => {
+                const bidChance = Math.random();
+                const nextBid = auctionState.currentBid * 1.1;
+                if (bidChance < rival.aggression && rival.cash > nextBid && auctionState.highestBidder !== rival.name) {
+                    auctionState.currentBid = Math.ceil(nextBid / 1000) * 1000;
+                    auctionState.highestBidder = rival.name;
+                    auctionState.timer = Math.min(auctionState.maxTime, auctionState.timer + 5); // Extend timer on bid
+                    showToast(`${rival.name} places a bid!`);
+                }
+            });
+
+            updateAuctionUI();
+
+            if (auctionState.timer <= 0) {
+                endAuction();
+            }
+        }
+
+        function handlePlayerBid() {
+            const nextBid = Math.ceil(auctionState.currentBid * 1.1 / 1000) * 1000;
+            if (gameState.cash >= nextBid) {
+                auctionState.currentBid = nextBid;
+                auctionState.highestBidder = gameState.playerName;
+                auctionState.timer = Math.min(auctionState.maxTime, auctionState.timer + 8);
+                updateAuctionUI();
+            } else {
+                showToast("You can't afford that bid!");
+            }
+        }
+        
+        function closeAuction() {
+            clearInterval(auctionInterval);
+            auctionModalEl.classList.remove('visible');
+            addLog(`You passed on the auction for the ${auctionState.item.name}.`, 'event');
+            auctionState.active = false;
+        }
+
+        function endAuction() {
+            clearInterval(auctionInterval);
+            auctionModalEl.classList.remove('visible');
+            const winner = auctionState.highestBidder;
+            const item = auctionState.item;
+            const finalBid = auctionState.currentBid;
+
+            if (winner === gameState.playerName) {
+                gameState.cash -= finalBid;
+                gameState.portfolio[auctionState.itemId] = {
+                    ...item,
+                    quantity: 1,
+                    totalCost: finalBid,
+                    unique: true
+                };
+                addLog(`You won the auction for the ${item.name} for ${formatCurrency(finalBid)}!`, 'achievement');
+            } else if (winner !== 'Starting Bid') {
+                addLog(`${winner} won the auction for the ${item.name}.`, 'event', 'bad');
+            } else {
+                addLog(`The auction for the ${item.name} ended without a winner.`, 'event');
+            }
+            auctionState.active = false;
+            updateUI();
+        }
+
+        // --- UI & RENDERING ---
+        function updateUI() {
+            calculateNetWorth();
+            checkAchievements();
+            cashBalanceEl.textContent = formatCurrency(gameState.cash);
+            netWorthEl.textContent = formatCurrency(gameState.netWorth);
+            taxesPaidEl.textContent = formatCurrency(gameState.totalTaxesPaid);
+            passiveIncomeDisplayEl.textContent = gameState.passiveIncome > 0 ? `+${formatCurrency(gameState.passiveIncome)}/tick` : '';
+            indexPriceEl.textContent = formatCurrency(currentMarketAverage);
+            buyIndexBtn.disabled = gameState.cash < currentMarketAverage;
+            sellIndexBtn.disabled = gameState.indexShares <= 0;
+            renderPlayerInfo();
+            renderSideHustle();
+            renderConsultingGig();
+            renderPortfolio();
+            renderMarketplace();
+            renderBusinesses();
+            renderAchievements();
+            renderSkills();
+            drawMarketChart();
+            saveGame();
+        }
+        
+        function updateAuctionUI() {
+            const item = auctionState.item;
+            auctionItemDisplayEl.innerHTML = `<div class="text-5xl mb-2">${item.icon}</div><h3 class="text-xl font-bold">${item.name}</h3><p class="text-sm text-gray-400">${item.description}</p>`;
+            auctionCurrentBidEl.textContent = formatCurrency(auctionState.currentBid);
+            auctionHighestBidderEl.textContent = auctionState.highestBidder;
+            auctionTimerBarEl.style.width = `${(auctionState.timer / auctionState.maxTime) * 100}%`;
+            const nextBid = Math.ceil(auctionState.currentBid * 1.1 / 1000) * 1000;
+            auctionBidBtn.textContent = `Bid ${formatCurrency(nextBid)}`;
+            auctionBidBtn.disabled = gameState.cash < nextBid;
+        }
+
+        function renderPlayerInfo() {
+            let currentTier = statusTiers.bronze;
+            let nextTier = statusTiers.silver;
+            const tierKeys = Object.keys(statusTiers);
+
+            for (let i = 0; i < tierKeys.length; i++) {
+                const tierKey = tierKeys[i];
+                if (gameState.netWorth >= statusTiers[tierKey].threshold) {
+                    currentTier = statusTiers[tierKey];
+                    if (i + 1 < tierKeys.length) {
+                        nextTier = statusTiers[tierKeys[i+1]];
+                    } else {
+                        nextTier = null; // Max tier
+                    }
+                }
+            }
+            
+            playerHeaderEl.style.borderColor = currentTier.color;
+
+             playerHeaderEl.innerHTML = `
+                <div id="player-avatar-container" class="text-5xl mx-auto mb-2 flex items-center justify-center">${gameState.playerAvatar}</div>
+                <h1 class="text-2xl font-bold brand-gradient">${gameState.playerName}</h1>
+                <p class="text-gray-400 text-sm">${gameState.companyName}</p>
+                <p class="text-sm font-semibold mt-2" style="color: ${currentTier.color};">
+                    <span class="mr-1">♦</span>${currentTier.name}
+                </p>
+                <div id="status-progress-container" class="mt-2">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span id="current-tier-name" style="color: ${currentTier.color}">${currentTier.name}</span>
+                        <span id="next-tier-name" style="color: ${nextTier ? nextTier.color : currentTier.color}">${nextTier ? nextTier.name : 'Max'}</span>
+                    </div>
+                    <div id="progress-bar-bg" class="w-full rounded-full h-2.5" style="background-color: ${nextTier ? nextTier.color : currentTier.color}55;">
+                        <div id="progress-bar-fg" class="h-2.5 rounded-full" style="width: 0%; background-color: ${currentTier.color};"></div>
+                    </div>
+                </div>
+                <button onclick="resetGame()" class="btn btn-secondary btn-sm absolute top-4 right-4 !py-1 !px-2">Reset</button>
+            `;
+
+            const progressBarFg = getEl('progress-bar-fg');
+            if (nextTier) {
+                const progressStart = currentTier.threshold;
+                const progressEnd = nextTier.threshold;
+                const progress = ((gameState.netWorth - progressStart) / (progressEnd - progressStart)) * 100;
+                progressBarFg.style.width = `${Math.min(100, progress)}%`;
+            } else {
+                progressBarFg.style.width = '100%';
+            }
+        }
+        
+        function renderPortfolio() {
+            portfolioListEl.innerHTML = '';
+            let portfolioEmpty = true;
+
+            for (const assetId in gameState.portfolio) {
+                const h = gameState.portfolio[assetId];
+                const a = assetsConfig[assetId] || h; // Use holding data for unique items
+                if (h.quantity > 0) {
+                    portfolioEmpty = false;
+                    const val = h.unique ? h.totalCost * h.resaleMultiplier : h.quantity * a.currentPrice;
+                    const avgPaid = h.totalCost / h.quantity;
+                    const glClass = val >= h.totalCost ? 'price-up' : 'price-down';
+                    const sellButtons = h.unique 
+                        ? `<button onclick="sellAsset('${assetId}', true)" class="btn btn-primary btn-sm !py-1 !px-3">Sell Now</button>` 
+                        : `<div class="flex flex-col gap-2"><button onclick="sellAsset('${assetId}')" class="btn btn-secondary btn-sm !py-1 !px-3">Sell 1</button><button onclick="sellAllAssets('${assetId}')" class="btn btn-danger btn-sm !py-1 !px-3">Sell All</button></div>`;
+                    const el = document.createElement('div');
+                    el.className = 'p-3 bg-gray-800 rounded-lg';
+                    el.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">${a.icon} ${h.quantity}x ${a.name}</p><p class="text-sm ${glClass}">Value: ${formatCurrency(val)}</p><p class="text-xs text-gray-400">Avg. Paid: ${formatCurrency(avgPaid)}</p></div>${sellButtons}</div>`;
+                    portfolioListEl.appendChild(el);
+                }
+            }
+
+            if (gameState.indexShares > 0) {
+                portfolioEmpty = false;
+                const val = gameState.indexShares * currentMarketAverage;
+                const avgPaid = gameState.indexTotalCost > 0 ? gameState.indexTotalCost / gameState.indexShares : 0;
+                const glClass = val >= gameState.indexTotalCost ? 'price-up' : 'price-down';
+                const el = document.createElement('div');
+                el.className = 'p-3 bg-gray-800 rounded-lg';
+                el.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">📊 ${gameState.indexShares}x Luxe 14 Index</p><p class="text-sm ${glClass}">Value: ${formatCurrency(val)}</p><p class="text-xs text-gray-400">Avg. Paid: ${formatCurrency(avgPaid)}</p></div><div class="flex flex-col gap-2"><button onclick="sellIndexShare()" class="btn btn-secondary btn-sm !py-1 !px-3">Sell 1</button><button onclick="sellAllIndexShares()" class="btn btn-danger btn-sm !py-1 !px-3">Sell All</button></div></div>`;
+                portfolioListEl.appendChild(el);
+            }
+
+            if (portfolioEmpty) {
+                portfolioListEl.innerHTML = `<p class="text-gray-400 text-center p-4">Your portfolio is empty.</p>`;
+            }
+        }
+        
+        function drawMarketChart() {
+            const ctx = marketChartEl.getContext('2d');
+            const w = marketChartEl.width;
+            const h = marketChartEl.height;
+            ctx.clearRect(0, 0, w, h);
+
+            if (gameState.marketHistory.length < 2) return;
+
+            const data = gameState.marketHistory;
+            const maxVal = Math.max(...data);
+            const minVal = Math.min(...data);
+            let range = maxVal - minVal;
+
+            if (range <= 0.01) { // Use a small threshold to prevent division by zero on flat lines
+                range = maxVal * 0.2; 
+            }
+
+            const isTrendingUp = data[data.length - 1] > data[0];
+            const strokeColor = isTrendingUp ? '#22c55e' : '#ef4444';
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            gradient.addColorStop(0, `${strokeColor}80`); // 50% opacity
+            gradient.addColorStop(1, `${strokeColor}00`); // 0% opacity
+
+            // Draw filled area
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            data.forEach((point, i) => {
+                const x = (i / (gameConfig.marketHistoryLength - 1)) * w;
+                const y = h - ((point - minVal) / range) * h;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(w, h);
+            ctx.closePath();
+            ctx.fill();
+
+
+            // Draw line
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            data.forEach((point, i) => {
+                const x = (i / (gameConfig.marketHistoryLength - 1)) * w;
+                const y = h - ((point - minVal) / range) * h;
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            // Draw labels
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '10px Inter';
+            ctx.fillText(`High: ${formatCurrency(maxVal)}`, 5, 12);
+            ctx.fillText(`Low: ${formatCurrency(minVal)}`, 5, h - 5);
+        }
+
+        function renderMarketplace() {
+            marketplaceListEl.innerHTML = '';
+            for (const assetId in assetsConfig) {
+                const a = assetsConfig[assetId], isLocked = a.unlock && gameState.netWorth < a.unlock, canAfford = gameState.cash >= a.currentPrice;
+                const el = document.createElement('div');
+                el.className = `card p-4 flex flex-col justify-between ${isLocked ? 'opacity-50' : ''}`;
+                let priceIndicator = '';
+                if (a.priceChange > 0) priceIndicator = `<span class="text-xs price-up">▲ ${formatCurrency(a.priceChange)}</span>`;
+                else if (a.priceChange < 0) priceIndicator = `<span class="text-xs price-down">▼ ${formatCurrency(Math.abs(a.priceChange))}</span>`;
+                let buyButton = isLocked ? `<button class="btn btn-disabled w-full mt-4" disabled>Unlock at ${formatCurrency(a.unlock)}</button>` : `<button onclick="buyAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full mt-4" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
+                el.innerHTML = `<div><p class="text-xl font-bold text-center">${a.icon}</p><h3 class="font-semibold text-center text-white">${a.name}</h3><p class="text-lg text-center font-bold text-yellow-400">${formatCurrency(a.currentPrice)}</p><p class="text-center h-4">${priceIndicator}</p></div>${buyButton}`;
+                marketplaceListEl.appendChild(el);
+            }
+        }
+        
+        function renderBusinesses() {
+            businessesListEl.innerHTML = '';
+            let hasAvailable = false;
+            for (const assetId in assetsConfig) {
+                const asset = assetsConfig[assetId];
+                if (!asset.business) continue;
+                
+                const business = asset.business;
+                const isOwned = gameState.businesses[assetId];
+                const canAfford = gameState.cash >= business.cost;
+                const hasRequiredAssets = gameState.portfolio[assetId]?.quantity >= business.required;
+                const businessItem = document.createElement('div');
+                businessItem.className = 'p-3 bg-gray-800 rounded-lg';
+                let buttonHtml;
+                if (isOwned) {
+                    buttonHtml = `<div class="text-right text-green-400">+${formatCurrency(business.income * (1 + gameState.skills.marketing * 0.05))}/tick</div>`;
+                } else {
+                    hasAvailable = true;
+                    buttonHtml = `<button onclick="buyBusiness('${assetId}')" class="btn ${canAfford && hasRequiredAssets ? 'btn-primary' : 'btn-disabled'} btn-sm !py-1 !px-3" ${!(canAfford && hasRequiredAssets) ? 'disabled' : ''}>Start</button>`;
+                }
+                businessItem.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">${assetsConfig[assetId].icon} ${business.name}</p><p class="text-sm text-gray-400">Cost: ${formatCurrency(business.cost)} (Req: ${business.required} ${asset.name}s)</p></div>${buttonHtml}</div>`;
+                businessesListEl.appendChild(businessItem);
+            }
+            if(!hasAvailable && Object.keys(gameState.businesses).length === 0) {
+                businessesListEl.innerHTML = `<p class="text-gray-400 text-center p-4">Acquire more assets to unlock business opportunities.</p>`;
+            }
+        }
+        
+        function renderAchievements() {
+            achievementsListEl.innerHTML = '';
+            if (Object.keys(achievementsConfig).length === 0) {
+                 achievementsListEl.innerHTML = `<p class="text-gray-400 text-center">No achievements yet.</p>`; return;
+            }
+            for (const id in achievementsConfig) {
+                const achievement = achievementsConfig[id];
+                const isUnlocked = gameState.achievements.includes(id);
+                const item = document.createElement('div');
+                item.className = `p-3 bg-gray-800 rounded-lg ${isUnlocked ? 'opacity-100' : 'opacity-50'}`;
+                item.innerHTML = `<p class="font-bold">${isUnlocked ? '🏆' : '🔒'} ${achievement.title}</p><p class="text-sm text-gray-400">${achievement.description}</p>`;
+                achievementsListEl.appendChild(item);
+            }
+        }
+
+        function renderSideHustle() {
+            const currentTier = gameConfig.clickerTiers[gameState.clickerLevel];
+            const clickValue = gameState.clickerLevel * (1 + gameState.skills.hustler * 0.1);
+            clickerBtn.textContent = `Earn ${formatCurrency(clickValue * gameState.clickerMultiplier)}`;
+
+            if (currentTier && currentTier.nextLevel) {
+                const progress = (gameState.clicksTowardsNextLevel / currentTier.clicksNeeded) * 100;
+                clickerProgressBar.style.width = `${progress}%`;
+                clickerProgressText.textContent = `${gameState.clicksTowardsNextLevel} / ${currentTier.clicksNeeded}`;
+            } else {
+                // Max level reached
+                clickerProgressBar.style.width = '100%';
+                clickerProgressText.textContent = 'Max Level';
+            }
+        }
+
+        function renderConsultingGig() {
+            if (gameState.consultingCooldown > 0) {
+                consultingBtn.classList.add('btn-disabled');
+                consultingBtn.disabled = true;
+                consultingBtn.textContent = `On Cooldown (${Math.ceil(gameState.consultingCooldown)}s)`;
+            } else {
+                consultingBtn.classList.remove('btn-disabled');
+                consultingBtn.disabled = false;
+                const reward = gameState.netWorth * 0.01;
+                consultingBtn.textContent = `Take Gig (Earn ${formatCurrency(reward)})`;
+            }
+        }
+
+        function renderSkills() {
+            skillsListEl.innerHTML = '';
+            for (const skillId in skillsConfig) {
+                const skill = skillsConfig[skillId];
+                const currentLevel = gameState.skills[skillId];
+                const cost = skill.cost(currentLevel);
+                const isMaxed = currentLevel >= skill.maxLevel;
+                const canAfford = gameState.cash >= cost;
+
+                const el = document.createElement('div');
+                el.className = 'p-3 bg-gray-800 rounded-lg';
+                
+                let buttonHtml;
+                if (isMaxed) {
+                    buttonHtml = `<button class="btn btn-disabled btn-sm !py-1 !px-3" disabled>Max Level</button>`;
+                } else {
+                    buttonHtml = `<button onclick="buySkill('${skillId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} btn-sm !py-1 !px-3" ${!canAfford ? 'disabled' : ''}>Buy (${formatCurrency(cost)})</button>`;
+                }
+
+                el.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">${skill.name} (Lvl ${currentLevel})</p>
+                            <p class="text-xs text-gray-400">${skill.description}</p>
+                        </div>
+                        ${buttonHtml}
+                    </div>
+                `;
+                skillsListEl.appendChild(el);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = message;
+            toastEl.appendChild(toast);
+            setTimeout(() => { toast.classList.add('show'); }, 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        // --- GAME START & TABS ---
+        function runGame() {
+            characterScreenEl.classList.remove('visible');
+            gameContainerEl.classList.remove('hidden');
+            renderPlayerInfo();
+            updateUI();
+            gameLoop = setInterval(updateMarket, gameConfig.gameSpeed);
+        }
+
+        function winGame() {
+            winModalEl.classList.add('visible');
+        }
+
+        function setupTabs() {
+            const portfolioTabs = [getEl('tab-portfolio'), getEl('tab-businesses'), getEl('tab-skills')];
+            const portfolioLists = [portfolioListEl, businessesListEl, skillsListEl];
+            portfolioTabs.forEach((tab, index) => {
+                if(tab) tab.addEventListener('click', () => {
+                    portfolioTabs.forEach(t => t.classList.remove('active'));
+                    portfolioLists.forEach(l => l.classList.add('hidden'));
+                    tab.classList.add('active');
+                    portfolioLists[index].classList.remove('hidden');
+                });
+            });
+
+            const marketTabs = [getEl('tab-index'), getEl('tab-news')];
+            const marketViews = [getEl('index-view'), getEl('news-view')];
+            marketTabs.forEach((tab, index) => {
+                if(tab) tab.addEventListener('click', () => {
+                    marketTabs.forEach(t => t.classList.remove('active'));
+                    marketViews.forEach(v => v.classList.add('hidden'));
+                    tab.classList.add('active');
+                    marketViews[index].classList.remove('hidden');
+                });
+            });
+        }
+
+        function init() {
+            // Initialize asset prices from config
+            let initialTotalValue = 0;
+            const assetCount = Object.keys(assetsConfig).length;
+            for (const id in assetsConfig) {
+                const asset = assetsConfig[id];
+                asset.currentPrice = asset.basePrice;
+                asset.priceChange = 0;
+                asset.targetPrice = null;
+                asset.transitionTicks = 0;
+                initialTotalValue += asset.basePrice;
+            }
+            currentMarketAverage = initialTotalValue / assetCount;
+
+            if (loadGame()) {
+                runGame();
+            } else {
+                characterScreenEl.classList.add('visible');
+            }
+            
+            // Event Listeners
+            clickerBtn.addEventListener('click', handleManualClick);
+            consultingBtn.addEventListener('click', handleConsultingGig);
+            buyIndexBtn.addEventListener('click', buyIndexShare);
+            sellIndexBtn.addEventListener('click', sellIndexShare);
+            auctionBidBtn.addEventListener('click', handlePlayerBid);
+            auctionPassBtn.addEventListener('click', closeAuction);
+            helpButton.addEventListener('click', () => helpModal.classList.add('visible'));
+            helpCloseBtn.addEventListener('click', () => helpModal.classList.remove('visible'));
+            avatarChoicesEl.addEventListener('click', (e) => {
+                const target = e.target.closest('.avatar-choice');
+                if (target) {
+                    avatarChoicesEl.querySelector('.selected').classList.remove('selected');
+                    target.classList.add('selected');
+                }
+            });
+            startGameBtnEl.addEventListener('click', () => {
+                const username = usernameInputEl.value.trim();
+                const companyName = companyNameInputEl.value.trim();
+                if (!username || !companyName) {
+                    showToast("Please enter both your name and a company name.");
+                    if (!username) usernameInputEl.classList.add('border-red-500');
+                    if (!companyName) companyNameInputEl.classList.add('border-red-500');
+                    return;
+                }
+                gameState.playerName = username;
+                gameState.companyName = companyName;
+                gameState.playerAvatar = avatarChoicesEl.querySelector('.selected').dataset.avatar;
+                runGame();
+            });
+            usernameInputEl.addEventListener('input', () => {
+                if(usernameInputEl.value.trim()){
+                    usernameInputEl.classList.remove('border-red-500');
+                }
+            });
+            companyNameInputEl.addEventListener('input', () => {
+                if(companyNameInputEl.value.trim()){
+                    companyNameInputEl.classList.remove('border-red-500');
+                }
+            });
+            cancelResetBtn.addEventListener('click', () => resetModalEl.classList.remove('visible'));
+            confirmResetBtn.addEventListener('click', () => {
+                localStorage.removeItem(gameConfig.saveKey);
+                window.location.reload();
+            });
+            continuePlayingBtn.addEventListener('click', () => winModalEl.classList.remove('visible'));
+            endGameBtn.addEventListener('click', () => resetGame(true));
+
+            setupTabs();
+        }
+
+        init();
+    </script>
+</body>
+</html>
