@@ -293,7 +293,7 @@
                 <canvas id="market-chart" width="400" height="100"></canvas>
                 <div class="mt-2 text-center">
                     <p class="font-bold text-lg" id="index-price">Loading...</p>
-                    <p class="text-sm text-gray-400">Luxe 14 Index</p>
+                    <p class="text-sm text-gray-400">Luxe 15 Index</p>
                 </div>
                 <div class="flex gap-4 mt-2">
                     <button id="buy-index-btn" class="btn btn-primary w-full !py-2">Buy</button>
@@ -361,7 +361,7 @@
                         <li>**Marketplace:** Buy and sell assets. Prices fluctuate constantly. Buy low, sell high!</li>
                         <li>**Portfolio:** View your current holdings, the average price you paid, and their current market value.</li>
                         <li>**Businesses:** Once you own enough of a certain asset, you can start a business to generate passive income every few seconds.</li>
-                        <li>**Market Index:** Invest in the entire market at once by buying shares of the Luxe 14 Index. A safer, more diversified investment.</li>
+                        <li>**Market Index:** Invest in the entire market at once by buying shares of the Luxe 15 Index. A safer, more diversified investment.</li>
                         <li>**Capital Gains Tax:** A 20% tax is applied to all profits you make from selling assets. Plan your sales carefully!</li>
                     </ul>
                 </div>
@@ -383,7 +383,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.4
+        BETA Version 1.5 | created by Ozaarkk
     </div>
 
     <script>
@@ -597,19 +597,20 @@
             }
         }
 
-        function buyAsset(assetId) {
+        function buyAsset(assetId, quantity = 1) {
             const asset = assetsConfig[assetId];
             const priceMultiplier = 1 - (gameState.skills.negotiation * 0.01);
             const finalPrice = asset.currentPrice * priceMultiplier;
+            const totalPrice = finalPrice * quantity;
 
-            if (gameState.cash >= finalPrice) {
-                gameState.cash -= finalPrice;
+            if (gameState.cash >= totalPrice) {
+                gameState.cash -= totalPrice;
                 if (!gameState.portfolio[assetId]) {
                     gameState.portfolio[assetId] = { quantity: 0, totalCost: 0 };
                 }
-                gameState.portfolio[assetId].quantity++;
-                gameState.portfolio[assetId].totalCost += finalPrice;
-                addLog(`Purchased ${asset.name} for ${formatCurrency(finalPrice)}.`, 'buy');
+                gameState.portfolio[assetId].quantity += quantity;
+                gameState.portfolio[assetId].totalCost += totalPrice;
+                addLog(`Purchased ${quantity}x ${asset.name} for ${formatCurrency(totalPrice)}.`, 'buy');
                 updateUI();
             }
         }
@@ -735,7 +736,7 @@
                 gameState.cash -= currentMarketAverage;
                 gameState.indexTotalCost += currentMarketAverage;
                 gameState.indexShares++;
-                addLog(`Bought 1 Luxe 14 Index share for ${formatCurrency(currentMarketAverage)}.`, 'buy');
+                addLog(`Bought 1 Luxe 15 Index share for ${formatCurrency(currentMarketAverage)}.`, 'buy');
                 updateUI();
             }
         }
@@ -756,7 +757,7 @@
                 gameState.cash += salePrice;
                 gameState.indexTotalCost -= avgCost;
                 gameState.indexShares--;
-                addLog(`Sold 1 Luxe 14 Index share for ${formatCurrency(currentMarketAverage)}.`, 'sell');
+                addLog(`Sold 1 Luxe 15 Index share for ${formatCurrency(currentMarketAverage)}.`, 'sell');
                 updateUI();
             }
         }
@@ -776,7 +777,7 @@
                 }
 
                 gameState.cash += totalValue;
-                addLog(`Sold all ${gameState.indexShares} Luxe 14 Index shares for ${formatCurrency(totalValue)}.`, 'sell');
+                addLog(`Sold all ${gameState.indexShares} Luxe 15 Index shares for ${formatCurrency(totalValue)}.`, 'sell');
                 gameState.indexShares = 0;
                 gameState.indexTotalCost = 0;
                 updateUI();
@@ -1162,7 +1163,7 @@
                 const glClass = val >= gameState.indexTotalCost ? 'price-up' : 'price-down';
                 const el = document.createElement('div');
                 el.className = 'p-3 bg-gray-800 rounded-lg';
-                el.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">📊 ${gameState.indexShares}x Luxe 14 Index</p><p class="text-sm ${glClass}">Value: ${formatCurrency(val)}</p><p class="text-xs text-gray-400">Avg. Paid: ${formatCurrency(avgPaid)}</p></div><div class="flex flex-col gap-2"><button onclick="sellIndexShare()" class="btn btn-secondary btn-sm !py-1 !px-3">Sell 1</button><button onclick="sellAllIndexShares()" class="btn btn-danger btn-sm !py-1 !px-3">Sell All</button></div></div>`;
+                el.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-bold">📊 ${gameState.indexShares}x Luxe 15 Index</p><p class="text-sm ${glClass}">Value: ${formatCurrency(val)}</p><p class="text-xs text-gray-400">Avg. Paid: ${formatCurrency(avgPaid)}</p></div><div class="flex flex-col gap-2"><button onclick="sellIndexShare()" class="btn btn-secondary btn-sm !py-1 !px-3">Sell 1</button><button onclick="sellAllIndexShares()" class="btn btn-danger btn-sm !py-1 !px-3">Sell All</button></div></div>`;
                 portfolioListEl.appendChild(el);
             }
 
@@ -1236,14 +1237,25 @@
         function renderMarketplace() {
             marketplaceListEl.innerHTML = '';
             for (const assetId in assetsConfig) {
-                const a = assetsConfig[assetId], isLocked = a.unlock && gameState.netWorth < a.unlock, canAfford = gameState.cash >= a.currentPrice;
+                const a = assetsConfig[assetId];
+                const isLocked = a.unlock && gameState.netWorth < a.unlock;
+                const canAfford1 = gameState.cash >= a.currentPrice;
+                const canAfford2 = gameState.cash >= a.currentPrice * 2;
+
                 const el = document.createElement('div');
                 el.className = `card p-4 flex flex-col justify-between ${isLocked ? 'opacity-50' : ''}`;
                 let priceIndicator = '';
                 if (a.priceChange > 0) priceIndicator = `<span class="text-xs price-up">▲ ${formatCurrency(a.priceChange)}</span>`;
                 else if (a.priceChange < 0) priceIndicator = `<span class="text-xs price-down">▼ ${formatCurrency(Math.abs(a.priceChange))}</span>`;
-                let buyButton = isLocked ? `<button class="btn btn-disabled w-full mt-4" disabled>Unlock at ${formatCurrency(a.unlock)}</button>` : `<button onclick="buyAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full mt-4" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
-                el.innerHTML = `<div><p class="text-xl font-bold text-center">${a.icon}</p><h3 class="font-semibold text-center text-white">${a.name}</h3><p class="text-lg text-center font-bold text-yellow-400">${formatCurrency(a.currentPrice)}</p><p class="text-center h-4">${priceIndicator}</p></div>${buyButton}`;
+
+                let buyButtons = isLocked
+                    ? `<button class="btn btn-disabled w-full mt-4" disabled>Unlock at ${formatCurrency(a.unlock)}</button>`
+                    : `<div class="flex gap-2 mt-4">
+                           <button onclick="buyAsset('${assetId}', 1)" class="btn ${canAfford1 ? 'btn-primary' : 'btn-disabled'} w-1/2 !py-2 !px-1" ${!canAfford1 ? 'disabled' : ''}>x1</button>
+                           <button onclick="buyAsset('${assetId}', 2)" class="btn ${canAfford2 ? 'btn-primary' : 'btn-disabled'} w-1/2 !py-2 !px-1" ${!canAfford2 ? 'disabled' : ''}>x2</button>
+                       </div>`;
+
+                el.innerHTML = `<div><p class="text-xl font-bold text-center">${a.icon}</p><h3 class="font-semibold text-center text-white">${a.name}</h3><p class="text-lg text-center font-bold text-yellow-400">${formatCurrency(a.currentPrice)}</p><p class="text-center h-4">${priceIndicator}</p></div>${buyButtons}`;
                 marketplaceListEl.appendChild(el);
             }
         }
