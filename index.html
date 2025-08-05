@@ -219,19 +219,32 @@
         <!-- Left Column: Player Stats & Achievements -->
         <div class="lg:col-span-3 space-y-6">
             <header id="player-header" class="text-center card p-6 no-hover relative border-2"></header>
-            <div class="card p-6 text-center no-hover">
-                <h2 class="text-lg font-semibold text-gray-300">Net Worth</h2>
-                <p id="net-worth" class="text-4xl font-bold text-white">$10,000</p>
+            
+            <!-- Combined Financial Summary Card -->
+            <div class="card p-4 no-hover space-y-3">
+                <div>
+                    <div class="flex justify-between items-baseline">
+                        <h2 class="text-md font-semibold text-gray-300">Net Worth</h2>
+                        <p id="net-worth" class="text-2xl font-bold text-white truncate">$10,000</p>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700/50"></div>
+                <div>
+                    <div class="flex justify-between items-baseline">
+                        <h2 class="text-md font-semibold text-green-400">Cash</h2>
+                        <p id="cash-balance" class="text-xl font-bold text-green-400 truncate">$10,000</p>
+                    </div>
+                     <p id="passive-income-display" class="text-xs text-green-400/80 text-right h-4"></p>
+                </div>
+                 <div class="border-t border-gray-700/50"></div>
+                <div>
+                    <div class="flex justify-between items-baseline">
+                        <h2 class="text-md font-semibold text-red-400">Taxes Paid</h2>
+                        <p id="taxes-paid" class="text-lg font-bold text-red-400 truncate">$0</p>
+                    </div>
+                </div>
             </div>
-             <div class="card p-6 text-center no-hover">
-                <h2 class="text-lg font-semibold text-green-400">Cash Balance</h2>
-                <p id="cash-balance" class="text-3xl font-bold text-green-400">$10,000</p>
-                <p id="passive-income-display" class="text-sm text-green-400 mt-1 h-5"></p>
-            </div>
-            <div class="card p-6 text-center no-hover">
-                <h2 class="text-lg font-semibold text-red-400">Taxes Paid</h2>
-                <p id="taxes-paid" class="text-2xl font-bold text-red-400">$0</p>
-            </div>
+
             <div class="card p-6">
                  <h2 class="text-xl font-semibold mb-4 text-center">Side Hustle</h2>
                  <div class="mb-4">
@@ -370,7 +383,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.3
+        BETA Version 1.4
     </div>
 
     <script>
@@ -539,7 +552,14 @@
               transactionLogListEl = getEl('transaction-log-list');
 
         // --- CORE LOGIC ---
-        const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        const formatCurrency = (amount) => {
+             if (amount >= 1000000000000000) return `$${(amount / 1000000000000000).toFixed(3)}Q`;
+             if (amount >= 1000000000000) return `$${(amount / 1000000000000).toFixed(3)}T`;
+             if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(3)}B`;
+             if (amount >= 1000000) return `$${(amount / 1000000).toFixed(3)}M`;
+             if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}K`;
+             return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        }
         
         function saveGame() {
             try {
@@ -1457,4 +1477,3 @@
     </script>
 </body>
 </html>
-
