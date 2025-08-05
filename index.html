@@ -166,6 +166,26 @@
             overflow-y: auto;
             padding-right: 1rem;
         }
+        .floating-dollar {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #22c55e;
+            opacity: 1;
+            animation: float-up 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
+        }
+        @keyframes float-up {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-60px) scale(1.5);
+            }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -251,9 +271,9 @@
                     <div id="tab-businesses" class="tab">Businesses</div>
                     <div id="tab-skills" class="tab">Skills</div>
                 </div>
-                <div id="portfolio-list" class="mt-4 space-y-4 max-h-[20vh] overflow-y-auto pr-2"></div>
-                <div id="businesses-list" class="mt-4 space-y-4 max-h-[20vh] overflow-y-auto pr-2 hidden"></div>
-                <div id="skills-list" class="mt-4 space-y-4 max-h-[20vh] overflow-y-auto pr-2 hidden"></div>
+                <div id="portfolio-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2"></div>
+                <div id="businesses-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
+                <div id="skills-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
             </div>
              <div class="card p-6">
                 <h2 class="text-xl font-semibold mb-4 text-center">Market Index</h2>
@@ -269,11 +289,11 @@
             </div>
             <div class="card p-6">
                 <h2 class="text-xl font-semibold mb-4 text-center">Market News</h2>
-                <div id="log-list" class="space-y-2 text-sm max-h-[12vh] overflow-y-auto pr-2"></div>
+                <div id="log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
             </div>
-             <div class="card p-6">
+            <div class="card p-6">
                 <h2 class="text-xl font-semibold mb-4 text-center">Transaction Log</h2>
-                <div id="transaction-log" class="space-y-2 text-sm max-h-[12vh] overflow-y-auto pr-2"></div>
+                <div id="transaction-log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
             </div>
         </div>
     </div>
@@ -336,7 +356,7 @@
                     <h3 class="font-bold text-lg text-yellow-400">Making Money</h3>
                     <ul class="list-disc list-inside text-sm space-y-1">
                         <li>**Side Hustle:** Click the "Earn" button to get extra cash. The more you click, the more the payout increases over time.</li>
-                        <li>**Consulting Gigs:** Take on high-paying gigs for a large cash injection based on your net worth. These have a 60-second cooldown.</li>
+                        <li>**Consulting Gigs:** Take on high-paying gigs for a large cash injection based on your net worth. These have a 5-minute cooldown.</li>
                         <li>**Skills:** Purchase permanent upgrades to increase your income and reduce costs.</li>
                         <li>**Auctions:** Occasionally, a rare item will go up for auction. Bid against rivals to win unique collectibles that can be sold for a massive profit.</li>
                     </ul>
@@ -350,7 +370,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.1
+        BETA Version 1.3
     </div>
 
     <script>
@@ -381,7 +401,7 @@
                 20: { nextLevel: 50, clicksNeeded: 1000 },
                 50: { nextLevel: null, clicksNeeded: Infinity } // Max level
             },
-            consultingBaseCooldown: 60, // in seconds
+            consultingBaseCooldown: 300, // in seconds (5 minutes)
             capitalGainsTaxRate: 0.20,
         };
 
@@ -395,20 +415,13 @@
             ruby: { threshold: 400000000000, name: 'Ruby', color: '#e0115f' },
         };
 
-        const skillsConfig = {
-            negotiation: { name: "Negotiation Skills", description: "Reduce asset purchase prices by 1% per level.", maxLevel: 10, cost: (level) => 100000 * Math.pow(5, level) },
-            marketing: { name: "Marketing Genius", description: "Increase all business income by 5% per level.", maxLevel: 10, cost: (level) => 500000 * Math.pow(5, level) },
-            hustler: { name: "Efficient Hustler", description: "Increase Side Hustle income by 10% per level.", maxLevel: 10, cost: (level) => 10000 * Math.pow(4, level) },
-        };
-
         const assetsConfig = {
-            cologne: { name: 'Fine Cologne', basePrice: 250, maxPrice: 1500, volatility: 0.2, icon: '🧴' },
-            scarf: { name: 'Silk Scarf', basePrice: 750, maxPrice: 4000, volatility: 0.22, icon: '🧣' },
             sunglasses: { name: 'Designer Sunglasses', basePrice: 500, maxPrice: 3000, volatility: 0.25, icon: '🕶️' },
             wallet: { name: 'Fine Leather Wallet', basePrice: 1200, maxPrice: 6000, volatility: 0.28, icon: '👝' },
             watch: { name: 'Swiss Tourbillon', basePrice: 8000, maxPrice: 40000, volatility: 0.3, icon: '⌚',
                 business: { name: 'Boutique Reseller', cost: 60000, required: 5, income: 150 } },
             gown: { name: 'Haute Couture Gown', basePrice: 15000, maxPrice: 75000, volatility: 0.35, icon: '👗', unlock: 50000 },
+            champagne: { name: 'Vintage Champagne', basePrice: 25000, maxPrice: 150000, volatility: 0.38, icon: '🍾', unlock: 100000 },
             car: { name: 'Hypercar', basePrice: 300000, maxPrice: 1200000, volatility: 0.4, icon: '🏎️', unlock: 150000,
                 business: { name: 'Luxury Car Rental', cost: 1200000, required: 3, income: 1800 } },
             art: { name: 'Blue-Chip Artwork', basePrice: 600000, maxPrice: 7500000, volatility: 0.5, icon: '🖼️', unlock: 750000,
@@ -438,8 +451,6 @@
 
         const eventsConfig = [
             // Good Events
-            { title: "New Fragrance Trend!", description: "A viral social media trend has made Fine Cologne a must-have item.", type: 'good', effect: { target: 'cologne', multiplier: 2.2, duration: 4 } },
-            { title: "Rare Silk Discovery!", description: "A new source of rare silk has boosted the value of Silk Scarves.", type: 'good', effect: { target: 'scarf', multiplier: 1.9, duration: 3 } },
             { title: "Summer Heatwave!", description: "Designer Sunglasses are flying off the shelves.", type: 'good', effect: { target: 'sunglasses', multiplier: 2.5, duration: 4 } },
             { title: "New Leather Tannery!", description: "A new supplier has increased the quality of Fine Leather Wallets.", type: 'good', effect: { target: 'wallet', multiplier: 1.8, duration: 3 } },
             { title: "Celebrity Endorsement!", description: "A-lister seen with a Swiss Tourbillon, prices soar.", type: 'good', effect: { target: 'watch', multiplier: 1.9, duration: 4 } },
@@ -454,8 +465,6 @@
             { title: "Successful Launch!", description: "Your Space Exploration Co. successfully launched a rocket.", type: 'good', effect: { target: 'space_company', multiplier: 1.8, duration: 3 } },
             
             // Bad Events
-            { title: "Allergy Scare!", description: "A popular cologne ingredient is linked to allergic reactions.", type: 'bad', effect: { target: 'cologne', multiplier: 0.5, duration: 4 } },
-            { title: "Synthetic Silk Perfected!", description: "A new synthetic silk is nearly indistinguishable from the real thing, hurting scarf prices.", type: 'bad', effect: { target: 'scarf', multiplier: 0.6, duration: 5 } },
             { title: "Knockoff Market Flooded!", description: "A wave of convincing fakes has hurt the sunglasses market.", type: 'bad', effect: { target: 'sunglasses', multiplier: 0.4, duration: 4 } },
             { title: "Vegan Leather Trend!", description: "A trend towards vegan materials has decreased demand for leather wallets.", type: 'bad', effect: { target: 'wallet', multiplier: 0.6, duration: 5 } },
             { title: "Smartwatch Craze!", description: "The latest tech gadget is making traditional watches seem obsolete.", type: 'bad', effect: { target: 'watch', multiplier: 0.7, duration: 3 } },
@@ -490,6 +499,12 @@
             trillionaire: { title: "Trillionaire", description: "Reach a net worth of $1,000,000,000,000.", condition: (gs) => gs.netWorth >= 1000000000000 },
             quadrillionaire: { title: "Quadrillionaire", description: "Reach a net worth of $1,000,000,000,000,000.", condition: (gs) => gs.netWorth >= gameConfig.winCondition },
         };
+        
+        const skillsConfig = {
+            negotiation: { name: 'Negotiation', description: 'Reduces asset purchase prices by 1% per level.', cost: (level) => 50000 * Math.pow(2, level), maxLevel: 10 },
+            marketing: { name: 'Marketing', description: 'Increases passive income from businesses by 5% per level.', cost: (level) => 100000 * Math.pow(3, level), maxLevel: 10 },
+            hustler: { name: 'Hustler Spirit', description: 'Increases manual click value by 10% per level.', cost: (level) => 25000 * Math.pow(2.5, level), maxLevel: 15 },
+        };
 
         let activeEvent = null;
         let gameLoop, auctionInterval;
@@ -521,7 +536,7 @@
               consultingBtn = getEl('consulting-btn'), helpButton = getEl('help-button'),
               helpModal = getEl('help-modal'), helpCloseBtn = getEl('help-close-btn'),
               taxesPaidEl = getEl('taxes-paid'),
-              transactionLogEl = getEl('transaction-log');
+              transactionLogListEl = getEl('transaction-log-list');
 
         // --- CORE LOGIC ---
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
@@ -562,19 +577,19 @@
             }
         }
 
-        function buyAsset(assetId, quantity = 1) {
+        function buyAsset(assetId) {
             const asset = assetsConfig[assetId];
             const priceMultiplier = 1 - (gameState.skills.negotiation * 0.01);
-            const finalPrice = asset.currentPrice * priceMultiplier * quantity;
+            const finalPrice = asset.currentPrice * priceMultiplier;
 
             if (gameState.cash >= finalPrice) {
                 gameState.cash -= finalPrice;
                 if (!gameState.portfolio[assetId]) {
                     gameState.portfolio[assetId] = { quantity: 0, totalCost: 0 };
                 }
-                gameState.portfolio[assetId].quantity += quantity;
+                gameState.portfolio[assetId].quantity++;
                 gameState.portfolio[assetId].totalCost += finalPrice;
-                addLog(`Purchased ${quantity}x ${asset.name} for ${formatCurrency(finalPrice)}.`, 'buy');
+                addLog(`Purchased ${asset.name} for ${formatCurrency(finalPrice)}.`, 'buy');
                 updateUI();
             }
         }
@@ -649,7 +664,7 @@
             }
         }
 
-        function handleManualClick() {
+        function handleManualClick(event) {
             const clickValue = gameState.clickerLevel * (1 + gameState.skills.hustler * 0.1);
             gameState.cash += clickValue * gameState.clickerMultiplier;
             gameState.clicksTowardsNextLevel++;
@@ -661,6 +676,25 @@
                 showToast(`Side Hustle upgraded! You now earn ${formatCurrency(gameState.clickerLevel)} per click.`);
             }
             
+            // Animation logic
+            const card = clickerBtn.parentElement;
+            const cardRect = card.getBoundingClientRect();
+            const dollar = document.createElement('span');
+            dollar.className = 'floating-dollar';
+            dollar.textContent = '💲';
+
+            const x = event.clientX - cardRect.left;
+            const y = event.clientY - cardRect.top;
+
+            dollar.style.left = `${x}px`;
+            dollar.style.top = `${y}px`;
+
+            card.appendChild(dollar);
+
+            setTimeout(() => {
+                dollar.remove();
+            }, 1000); // Remove after 1s (animation duration)
+
             cashBalanceEl.textContent = formatCurrency(gameState.cash);
             netWorthEl.textContent = formatCurrency(gameState.netWorth + (clickValue * gameState.clickerMultiplier)); 
             renderSideHustle();
@@ -669,7 +703,7 @@
         function handleConsultingGig() {
             if (gameState.consultingCooldown > 0) return;
 
-            const reward = gameState.netWorth * 0.01;
+            const reward = gameState.netWorth * 0.005; 
             gameState.cash += reward;
             gameState.consultingCooldown = gameConfig.consultingBaseCooldown;
             addLog(`Completed a consulting gig for ${formatCurrency(reward)}!`, 'income');
@@ -858,7 +892,11 @@
                 if (holding.unique) {
                     return sum + (holding.totalCost * holding.resaleMultiplier);
                 }
-                return sum + (holding.quantity * assetsConfig[id].currentPrice);
+                const asset = assetsConfig[id];
+                if (asset) {
+                    return sum + (holding.quantity * asset.currentPrice);
+                }
+                return sum;
             }, 0);
             const businessValue = Object.keys(gameState.businesses).reduce((sum, id) => sum + (assetsConfig[id]?.business?.cost || 0), 0);
             const indexValue = gameState.indexShares * currentMarketAverage;
@@ -883,17 +921,24 @@
         function addLog(message, type, subType = '') {
             const icons = { buy: '🟢', sell: '🔴', market: '📈', event: '⚡️', business: '💼', income: '💰', achievement: '🏆' };
             const logItem = document.createElement('p');
-            
-            const logTarget = (type === 'buy' || type === 'sell') ? transactionLogEl : logListEl;
-
-            if (type === 'event') {
-                if (subType === 'good') logItem.classList.add('news-good');
-                if (subType === 'bad') logItem.classList.add('news-bad');
-                if (subType === 'golden') logItem.classList.add('news-golden');
-            }
             logItem.innerHTML = `${icons[type] || '➡️'} ${message}`;
-            logTarget.prepend(logItem);
-            if (logTarget.children.length > 50) logTarget.removeChild(logTarget.lastChild);
+
+            if (type === 'buy' || type === 'sell') {
+                transactionLogListEl.prepend(logItem);
+                if (transactionLogListEl.children.length > 50) {
+                    transactionLogListEl.removeChild(transactionLogListEl.lastChild);
+                }
+            } else {
+                if (type === 'event') {
+                    if (subType === 'good') logItem.classList.add('news-good');
+                    if (subType === 'bad') logItem.classList.add('news-bad');
+                    if (subType === 'golden') logItem.classList.add('news-golden');
+                }
+                logListEl.prepend(logItem);
+                if (logListEl.children.length > 50) {
+                    logListEl.removeChild(logListEl.lastChild);
+                }
+            }
         }
 
         // --- AUCTION LOGIC ---
@@ -1177,12 +1222,8 @@
                 let priceIndicator = '';
                 if (a.priceChange > 0) priceIndicator = `<span class="text-xs price-up">▲ ${formatCurrency(a.priceChange)}</span>`;
                 else if (a.priceChange < 0) priceIndicator = `<span class="text-xs price-down">▼ ${formatCurrency(Math.abs(a.priceChange))}</span>`;
-                
-                let buyButtons = isLocked 
-                    ? `<button class="btn btn-disabled w-full mt-4" disabled>Unlock at ${formatCurrency(a.unlock)}</button>` 
-                    : `<div class="flex gap-2 mt-4"><button onclick="buyAsset('${assetId}', 1)" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-1/2" ${!canAfford ? 'disabled' : ''}>Buy x1</button><button onclick="buyAsset('${assetId}', 2)" class="btn ${gameState.cash >= a.currentPrice * 2 ? 'btn-primary' : 'btn-disabled'} w-1/2" ${gameState.cash < a.currentPrice * 2 ? 'disabled' : ''}>Buy x2</button></div>`;
-
-                el.innerHTML = `<div><p class="text-xl font-bold text-center">${a.icon}</p><h3 class="font-semibold text-center text-white">${a.name}</h3><p class="text-lg text-center font-bold text-yellow-400">${formatCurrency(a.currentPrice)}</p><p class="text-center h-4">${priceIndicator}</p></div>${buyButtons}`;
+                let buyButton = isLocked ? `<button class="btn btn-disabled w-full mt-4" disabled>Unlock at ${formatCurrency(a.unlock)}</button>` : `<button onclick="buyAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full mt-4" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
+                el.innerHTML = `<div><p class="text-xl font-bold text-center">${a.icon}</p><h3 class="font-semibold text-center text-white">${a.name}</h3><p class="text-lg text-center font-bold text-yellow-400">${formatCurrency(a.currentPrice)}</p><p class="text-center h-4">${priceIndicator}</p></div>${buyButton}`;
                 marketplaceListEl.appendChild(el);
             }
         }
@@ -1254,7 +1295,7 @@
             } else {
                 consultingBtn.classList.remove('btn-disabled');
                 consultingBtn.disabled = false;
-                const reward = gameState.netWorth * 0.01;
+                const reward = gameState.netWorth * 0.005;
                 consultingBtn.textContent = `Take Gig (Earn ${formatCurrency(reward)})`;
             }
         }
@@ -1361,7 +1402,8 @@
             }
             
             // Event Listeners
-            clickerBtn.addEventListener('click', handleManualClick);
+            clickerBtn.parentElement.style.position = 'relative'; // For animation positioning
+            clickerBtn.addEventListener('click', (event) => handleManualClick(event));
             consultingBtn.addEventListener('click', handleConsultingGig);
             buyIndexBtn.addEventListener('click', buyIndexShare);
             sellIndexBtn.addEventListener('click', sellIndexShare);
@@ -1415,3 +1457,4 @@
     </script>
 </body>
 </html>
+
