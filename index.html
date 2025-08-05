@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Luxe Legacy: Empire Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -185,6 +186,14 @@
                 opacity: 0;
                 transform: translateY(-60px) scale(1.5);
             }
+        }
+        #achievement-confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -378,12 +387,21 @@
              <button id="help-close-btn" class="btn btn-primary w-full mt-6">Got It</button>
         </div>
     </div>
+    <div id="achievement-modal" class="modal-overlay">
+        <canvas id="achievement-confetti" class="absolute top-0 left-0 w-full h-full"></canvas>
+        <div class="modal-content relative">
+            <h2 class="text-3xl font-bold brand-gradient mb-2">🏆 Achievement Unlocked! 🏆</h2>
+            <p id="achievement-title" class="text-xl font-semibold text-white"></p>
+            <p id="achievement-description" class="text-gray-300 mb-6"></p>
+            <button id="achievement-close-btn" class="btn btn-primary w-full">Awesome!</button>
+        </div>
+    </div>
     
     <!-- Toast Notification -->
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.5 | created by Ozaarkk
+        BETA Version 1.8 | created by Ozaarkk
     </div>
 
     <script>
@@ -426,6 +444,9 @@
             diamond: { threshold: 500000000, name: 'Diamond', color: '#b9f2ff' },
             emerald: { threshold: 1000000000, name: 'Emerald', color: '#50c878' },
             ruby: { threshold: 400000000000, name: 'Ruby', color: '#e0115f' },
+            sapphire: { threshold: 25000000000000, name: 'Sapphire', color: '#0F52BA' },
+            red_diamond: { threshold: 150000000000000, name: 'Red Diamond', color: '#FF0028' },
+            celestial: { threshold: 750000000000000, name: 'Celestial', color: '#6A0DAD' },
         };
 
         const assetsConfig = {
@@ -496,6 +517,9 @@
         ];
 
         const achievementsConfig = {
+            firstPurchase: { title: "First Steps", description: "Make your first purchase on the marketplace.", condition: (gs) => Object.keys(gs.portfolio).length > 0 },
+            sideHustlePro: { title: "Side Hustle Pro", description: "Upgrade your side hustle to earn $5/click.", condition: (gs) => gs.clickerLevel >= 5 },
+            skilledInvestor: { title: "Skilled Investor", description: "Purchase your first skill upgrade.", condition: (gs) => Object.values(gs.skills).some(level => level > 0) },
             millionaire: { title: "Millionaire's Club", description: "Reach a net worth of $1,000,000.", condition: (gs) => gs.netWorth >= 1000000 },
             watchCollector: { title: "Time Keeper", description: "Own 5 Swiss Tourbillons.", condition: (gs) => gs.portfolio.watch?.quantity >= 5 },
             watchHoarder: { title: "Watch Hoarder", description: "Own 500 Swiss Tourbillons.", condition: (gs) => gs.portfolio.watch?.quantity >= 500 },
@@ -510,6 +534,9 @@
             rocketMan: { title: "To the Moon!", description: "Found a Space Exploration Co.", condition: (gs) => gs.portfolio.space_company?.quantity > 0 },
             billionaire: { title: "Billionaire", description: "Reach a net worth of $1,000,000,000.", condition: (gs) => gs.netWorth >= 1000000000 },
             trillionaire: { title: "Trillionaire", description: "Reach a net worth of $1,000,000,000,000.", condition: (gs) => gs.netWorth >= 1000000000000 },
+            yachtFleet: { title: "Yacht Fleet", description: "Own a fleet of 10 Superyachts.", condition: (gs) => gs.portfolio.yacht?.quantity >= 10 },
+            taxManCometh: { title: "The Tax Man Cometh", description: "Pay over $1 Trillion in total taxes.", condition: (gs) => gs.totalTaxesPaid >= 1000000000000 },
+            marketMover: { title: "Market Mover", description: "Own 1,000 shares of the Luxe 15 Index.", condition: (gs) => gs.indexShares >= 1000 },
             quadrillionaire: { title: "Quadrillionaire", description: "Reach a net worth of $1,000,000,000,000,000.", condition: (gs) => gs.netWorth >= gameConfig.winCondition },
         };
         
@@ -549,7 +576,9 @@
               consultingBtn = getEl('consulting-btn'), helpButton = getEl('help-button'),
               helpModal = getEl('help-modal'), helpCloseBtn = getEl('help-close-btn'),
               taxesPaidEl = getEl('taxes-paid'),
-              transactionLogListEl = getEl('transaction-log-list');
+              transactionLogListEl = getEl('transaction-log-list'),
+              achievementModalEl = getEl('achievement-modal'), achievementTitleEl = getEl('achievement-title'),
+              achievementDescriptionEl = getEl('achievement-description'), achievementCloseBtn = getEl('achievement-close-btn');
 
         // --- CORE LOGIC ---
         const formatCurrency = (amount) => {
@@ -927,13 +956,32 @@
             }
         }
         
+        function showAchievementPopup(id) {
+            const achievement = achievementsConfig[id];
+            achievementTitleEl.textContent = achievement.title;
+            achievementDescriptionEl.textContent = achievement.description;
+            achievementModalEl.classList.add('visible');
+
+            // Fire confetti
+            const canvas = document.getElementById('achievement-confetti');
+            const myConfetti = confetti.create(canvas, {
+                resize: true,
+                useWorker: true
+            });
+            myConfetti({
+                particleCount: 150,
+                spread: 180,
+                origin: { y: 0.6 }
+            });
+        }
+
         function checkAchievements() {
             for (const id in achievementsConfig) {
                 if (!gameState.achievements.includes(id)) {
                     if (achievementsConfig[id].condition(gameState)) {
                         gameState.achievements.push(id);
-                        showToast(`🏆 Achievement Unlocked: ${achievementsConfig[id].title}`);
                         addLog(`🏆 Unlocked: ${achievementsConfig[id].title}`, 'achievement');
+                        showAchievementPopup(id);
                     }
                 }
             }
@@ -979,7 +1027,8 @@
                 rivals: [
                     { name: 'Baron von Rich', cash: gameState.netWorth * (0.8 + Math.random() * 0.4), aggression: 0.6 },
                     { name: 'Lady Sterling', cash: gameState.netWorth * (0.9 + Math.random() * 0.4), aggression: 0.4 }
-                ]
+                ],
+                lastBidderWasPlayer: false
             };
             
             updateAuctionUI();
@@ -997,6 +1046,7 @@
                 if (bidChance < rival.aggression && rival.cash > nextBid && auctionState.highestBidder !== rival.name) {
                     auctionState.currentBid = Math.ceil(nextBid / 1000) * 1000;
                     auctionState.highestBidder = rival.name;
+                    auctionState.lastBidderWasPlayer = false;
                     showToast(`${rival.name} places a bid!`);
                 }
             });
@@ -1010,9 +1060,14 @@
 
         function handlePlayerBid() {
             const nextBid = Math.ceil(auctionState.currentBid * 1.1 / 1000) * 1000;
+            if (auctionState.lastBidderWasPlayer) {
+                showToast("You must wait for another bidder!");
+                return;
+            }
             if (gameState.cash >= nextBid) {
                 auctionState.currentBid = nextBid;
                 auctionState.highestBidder = gameState.playerName;
+                auctionState.lastBidderWasPlayer = true;
                 updateAuctionUI();
             } else {
                 showToast("You can't afford that bid!");
@@ -1082,7 +1137,7 @@
             auctionTimerBarEl.style.width = `${(auctionState.timer / auctionState.maxTime) * 100}%`;
             const nextBid = Math.ceil(auctionState.currentBid * 1.1 / 1000) * 1000;
             auctionBidBtn.textContent = `Bid ${formatCurrency(nextBid)}`;
-            auctionBidBtn.disabled = gameState.cash < nextBid;
+            auctionBidBtn.disabled = gameState.cash < nextBid || auctionState.lastBidderWasPlayer;
         }
 
         function renderPlayerInfo() {
@@ -1443,6 +1498,7 @@
             auctionPassBtn.addEventListener('click', closeAuction);
             helpButton.addEventListener('click', () => helpModal.classList.add('visible'));
             helpCloseBtn.addEventListener('click', () => helpModal.classList.remove('visible'));
+            achievementCloseBtn.addEventListener('click', () => achievementModalEl.classList.remove('visible'));
             avatarChoicesEl.addEventListener('click', (e) => {
                 const target = e.target.closest('.avatar-choice');
                 if (target) {
