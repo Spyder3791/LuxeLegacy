@@ -314,8 +314,12 @@
                 <div id="log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
             </div>
             <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4 text-center">Transaction Log</h2>
-                <div id="transaction-log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
+                <div class="flex border-b border-gray-700">
+                    <div id="tab-transactions" class="tab active">Transactions</div>
+                    <div id="tab-income" class="tab">Income</div>
+                </div>
+                <div id="transaction-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
+                <div id="income-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2 hidden"></div>
             </div>
         </div>
     </div>
@@ -401,7 +405,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.8 | created by Ozaarkk
+        BETA Version 1.9 | created by Ozaarkk
     </div>
 
     <script>
@@ -486,31 +490,63 @@
         const eventsConfig = [
             // Good Events
             { title: "Summer Heatwave!", description: "Designer Sunglasses are flying off the shelves.", type: 'good', effect: { target: 'sunglasses', multiplier: 2.5, duration: 4 } },
+            { title: "Influencer Craze!", description: "A famous influencer posts about your sunglasses, demand skyrockets.", type: 'good', effect: { target: 'sunglasses', multiplier: 2.0, duration: 3 } },
             { title: "New Leather Tannery!", description: "A new supplier has increased the quality of Fine Leather Wallets.", type: 'good', effect: { target: 'wallet', multiplier: 1.8, duration: 3 } },
+            { title: "Corporate Gift Season!", description: "Companies are buying leather wallets in bulk for their employees.", type: 'good', effect: { target: 'wallet', multiplier: 1.6, duration: 4 } },
             { title: "Celebrity Endorsement!", description: "A-lister seen with a Swiss Tourbillon, prices soar.", type: 'good', effect: { target: 'watch', multiplier: 1.9, duration: 4 } },
+            { title: "Limited Edition Release!", description: "A new, highly sought-after Swiss Tourbillon model is released.", type: 'good', effect: { target: 'watch', multiplier: 2.2, duration: 3 } },
             { title: "Met Gala Mania!", description: "Haute Couture Gowns are the hot item.", type: 'good', effect: { target: 'gown', multiplier: 2.0, duration: 4 } },
+            { title: "Royal Wedding!", description: "A royal wedding sparks a global interest in couture gowns.", type: 'good', effect: { target: 'gown', multiplier: 1.8, duration: 5 } },
+            { title: "New Year's Celebrations!", description: "Global celebrations lead to a surge in Vintage Champagne sales.", type: 'good', effect: { target: 'champagne', multiplier: 1.9, duration: 3 } },
+            { title: "Award-Winning Batch!", description: "Your latest batch of Vintage Champagne wins a prestigious award.", type: 'good', effect: { target: 'champagne', multiplier: 2.1, duration: 4 } },
             { title: "Tech Billionaire Buys Fleet!", description: "A tech mogul buys a fleet of Hypercars, driving up demand.", type: 'good', effect: { target: 'car', multiplier: 1.6, duration: 3 } },
+            { title: "Auto Show Success!", description: "A new Hypercar model is the star of an international auto show.", type: 'good', effect: { target: 'car', multiplier: 1.7, duration: 4 } },
             { title: "Art Heist!", description: "A famous painting is stolen, increasing demand for secure artwork.", type: 'good', effect: { target: 'art', multiplier: 1.8, duration: 3 } },
+            { title: "Lost Masterpiece Found!", description: "A previously lost work by a master is discovered, boosting the art market.", type: 'good', effect: { target: 'art', multiplier: 2.0, duration: 4 } },
             { title: "Vintage Wine Auction Record!", description: "A record-breaking auction has boosted the value of Vineyard Estates.", type: 'good', effect: { target: 'vineyard', multiplier: 1.4, duration: 5 } },
+            { title: "Perfect Harvest Season!", description: "Ideal weather conditions lead to an award-winning grape harvest.", type: 'good', effect: { target: 'vineyard', multiplier: 1.6, duration: 6 } },
             { title: "Luxury Travel Boom!", description: "Demand for private jets and yachts is at an all-time high.", type: 'good', effect: { target: ['jet', 'yacht'], multiplier: 1.5, duration: 4 } },
+            { title: "International Boat Show!", description: "A glamorous boat show in Monaco drives Superyacht sales.", type: 'good', effect: { target: 'yacht', multiplier: 1.6, duration: 4 } },
+            { title: "Corporate Travel Surge!", description: "An increase in global business travel boosts the private jet market.", type: 'good', effect: { target: 'jet', multiplier: 1.5, duration: 5 } },
             { title: "Urban Redevelopment!", description: "City revitalization has boosted Penthouse Suite values.", type: 'good', effect: { target: 'real_estate', multiplier: 1.3, duration: 6 } },
+            { title: "Foreign Investment Influx!", description: "A wave of foreign investment drives up luxury real estate prices.", type: 'good', effect: { target: 'real_estate', multiplier: 1.4, duration: 5 } },
+            { title: "Celebrity Hideaway!", description: "A major celebrity purchases a private island, creating a trend.", type: 'good', effect: { target: 'private_island', multiplier: 1.5, duration: 4 } },
             { title: "Blockbuster Hit!", description: "Your Movie Studio produced a record-breaking film.", type: 'good', effect: { target: 'movie_studio', multiplier: 1.5, duration: 5 } },
+            { title: "Major Streaming Deal!", description: "Your Movie Studio signs a lucrative deal with a streaming giant.", type: 'good', effect: { target: 'movie_studio', multiplier: 1.7, duration: 6 } },
             { title: "Championship Victory!", description: "Your Sports Franchise won the finals!", type: 'good', effect: { target: 'sports_franchise', multiplier: 1.6, duration: 4 } },
+            { title: "Hosting Major Event!", description: "Your franchise's stadium is chosen to host a major championship.", type: 'good', effect: { target: 'sports_franchise', multiplier: 1.8, duration: 5 } },
             { title: "Successful Launch!", description: "Your Space Exploration Co. successfully launched a rocket.", type: 'good', effect: { target: 'space_company', multiplier: 1.8, duration: 3 } },
+            { title: "Lucrative Government Contract!", description: "Your Space Exploration Co. wins a massive government contract.", type: 'good', effect: { target: 'space_company', multiplier: 2.0, duration: 4 } },
             
             // Bad Events
             { title: "Knockoff Market Flooded!", description: "A wave of convincing fakes has hurt the sunglasses market.", type: 'bad', effect: { target: 'sunglasses', multiplier: 0.4, duration: 4 } },
+            { title: "Unseasonably Cloudy!", description: "A long spell of bad weather across resort destinations hurts sunglass sales.", type: 'bad', effect: { target: 'sunglasses', multiplier: 0.6, duration: 5 } },
             { title: "Vegan Leather Trend!", description: "A trend towards vegan materials has decreased demand for leather wallets.", type: 'bad', effect: { target: 'wallet', multiplier: 0.6, duration: 5 } },
+            { title: "Rise of Digital Payments!", description: "The growing popularity of phone payments makes physical wallets less necessary.", type: 'bad', effect: { target: 'wallet', multiplier: 0.5, duration: 6 } },
             { title: "Smartwatch Craze!", description: "The latest tech gadget is making traditional watches seem obsolete.", type: 'bad', effect: { target: 'watch', multiplier: 0.7, duration: 3 } },
+            { title: "Supply Chain Disruption!", description: "A shortage of crucial components disrupts Swiss watch production.", type: 'bad', effect: { target: 'watch', multiplier: 0.6, duration: 5 } },
             { title: "Fast Fashion Backlash!", description: "A movement against fast fashion has hurt the couture market.", type: 'bad', effect: { target: 'gown', multiplier: 0.6, duration: 4 } },
+            { title: "Minimalism Trend!", description: "A new trend towards minimalism and simplicity reduces demand for elaborate gowns.", type: 'bad', effect: { target: 'gown', multiplier: 0.7, duration: 5 } },
+            { title: "New Alcohol Tax!", description: "A hefty new tax on luxury alcoholic beverages has been implemented.", type: 'bad', effect: { target: 'champagne', multiplier: 0.7, duration: 4 } },
+            { title: "Counterfeit Scandal!", description: "A batch of counterfeit Vintage Champagne floods the market, damaging consumer trust.", type: 'bad', effect: { target: 'champagne', multiplier: 0.5, duration: 5 } },
             { title: "New Emissions Tax!", description: "A new tax on high-performance engines has hit the Hypercar market.", type: 'bad', effect: { target: 'car', multiplier: 0.75, duration: 4 } },
+            { title: "Massive Recall!", description: "A major safety recall is issued for a popular Hypercar model.", type: 'bad', effect: { target: 'car', multiplier: 0.6, duration: 5 } },
             { title: "Masterpiece Forgery Scandal!", description: "A widespread forgery scandal has shaken the art world.", type: 'bad', effect: { target: 'art', multiplier: 0.5, duration: 4 } },
+            { title: "Art Market Bubble!", description: "Pundits warn of a bubble in the art market, causing collectors to sell off.", type: 'bad', effect: { target: 'art', multiplier: 0.6, duration: 6 } },
             { title: "Poor Harvest!", description: "A bad year for grapes has negatively impacted Vineyard Estates.", type: 'bad', effect: { target: 'vineyard', multiplier: 0.6, duration: 5 } },
+            { title: "Pest Infestation!", description: "A devastating pest has ruined a significant portion of the grape harvest.", type: 'bad', effect: { target: 'vineyard', multiplier: 0.5, duration: 6 } },
             { title: "Fuel Price Spike!", description: "Operating costs for private jets and yachts have skyrocketed.", type: 'bad', effect: { target: ['jet', 'yacht'], multiplier: 0.7, duration: 3 } },
+            { title: "New Environmental Regulations!", description: "Strict new environmental laws make owning a Superyacht more expensive.", type: 'bad', effect: { target: 'yacht', multiplier: 0.7, duration: 5 } },
+            { title: "Pilot Strike!", description: "A widespread pilot strike grounds many private jets, hurting the charter market.", type: 'bad', effect: { target: 'jet', multiplier: 0.6, duration: 4 } },
             { title: "Housing Market Crash!", description: "A bubble has burst, causing Penthouse Suite values to plummet.", type: 'bad', effect: { target: 'real_estate', multiplier: 0.6, duration: 6 } },
+            { title: "Zoning Law Changes!", description: "New zoning laws in major cities restrict the development of luxury penthouses.", type: 'bad', effect: { target: 'real_estate', multiplier: 0.7, duration: 5 } },
+            { title: "Hurricane Season!", description: "A severe hurricane season threatens private islands in popular locations.", type: 'bad', effect: { target: 'private_island', multiplier: 0.6, duration: 4 } },
             { title: "Movie Flop!", description: "Your studio's latest film was a critical and commercial failure.", type: 'bad', effect: { target: 'movie_studio', multiplier: 0.5, duration: 5 } },
+            { title: "Writers' Strike!", description: "A lengthy writers' strike halts all new productions at your studio.", type: 'bad', effect: { target: 'movie_studio', multiplier: 0.6, duration: 6 } },
             { title: "Team Scandal!", description: "A major scandal has rocked your Sports Franchise.", type: 'bad', effect: { target: 'sports_franchise', multiplier: 0.6, duration: 4 } },
+            { title: "Star Player Injured!", description: "Your franchise's star player suffers a season-ending injury.", type: 'bad', effect: { target: 'sports_franchise', multiplier: 0.7, duration: 5 } },
             { title: "Launch Failure!", description: "A rocket from your Space Exploration Co. exploded on the launchpad.", type: 'bad', effect: { target: 'space_company', multiplier: 0.4, duration: 3 } },
+            { title: "Space Debris Collision!", description: "A satellite is destroyed by space debris, causing investor confidence to plummet.", type: 'bad', effect: { target: 'space_company', multiplier: 0.5, duration: 5 } },
             
             // Special Golden Event
             { title: "Hustle Pays Off!", description: "Your side hustle is booming! Your clicks are worth double for a limited time.", type: 'golden', effect: { target: 'clicker', multiplier: 2, duration: 15 } },
@@ -577,6 +613,7 @@
               helpModal = getEl('help-modal'), helpCloseBtn = getEl('help-close-btn'),
               taxesPaidEl = getEl('taxes-paid'),
               transactionLogListEl = getEl('transaction-log-list'),
+              incomeLogListEl = getEl('income-log-list'),
               achievementModalEl = getEl('achievement-modal'), achievementTitleEl = getEl('achievement-title'),
               achievementDescriptionEl = getEl('achievement-description'), achievementCloseBtn = getEl('achievement-close-btn');
 
@@ -996,6 +1033,11 @@
                 transactionLogListEl.prepend(logItem);
                 if (transactionLogListEl.children.length > 50) {
                     transactionLogListEl.removeChild(transactionLogListEl.lastChild);
+                }
+            } else if (type === 'income' || type === 'business') {
+                 incomeLogListEl.prepend(logItem);
+                if (incomeLogListEl.children.length > 50) {
+                    incomeLogListEl.removeChild(incomeLogListEl.lastChild);
                 }
             } else {
                 if (type === 'event') {
@@ -1456,14 +1498,14 @@
                 });
             });
 
-            const marketTabs = [getEl('tab-index'), getEl('tab-news')];
-            const marketViews = [getEl('index-view'), getEl('news-view')];
-            marketTabs.forEach((tab, index) => {
+            const logTabs = [getEl('tab-transactions'), getEl('tab-income')];
+            const logLists = [transactionLogListEl, incomeLogListEl];
+            logTabs.forEach((tab, index) => {
                 if(tab) tab.addEventListener('click', () => {
-                    marketTabs.forEach(t => t.classList.remove('active'));
-                    marketViews.forEach(v => v.classList.add('hidden'));
+                    logTabs.forEach(t => t.classList.remove('active'));
+                    logLists.forEach(l => l.classList.add('hidden'));
                     tab.classList.add('active');
-                    marketViews[index].classList.remove('hidden');
+                    logLists[index].classList.remove('hidden');
                 });
             });
         }
