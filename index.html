@@ -224,102 +224,116 @@
         </div>
     </div>
 
-    <div id="game-container" class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
-        <!-- Left Column: Player Stats & Achievements -->
-        <div class="lg:col-span-3 space-y-6">
-            <header id="player-header" class="text-center card p-6 no-hover relative border-2"></header>
-            
-            <!-- Combined Financial Summary Card -->
-            <div class="card p-4 no-hover space-y-3">
-                <div>
-                    <div class="flex justify-between items-baseline">
-                        <h2 class="text-md font-semibold text-gray-300">Net Worth</h2>
-                        <p id="net-worth" class="text-2xl font-bold text-white truncate">$10,000</p>
+    <div id="game-container" class="max-w-screen-2xl mx-auto hidden">
+        <div class="flex items-center justify-center mb-4 border-b border-gray-700">
+            <div id="main-tab-marketplace" class="tab active">Marketplace</div>
+            <div id="main-tab-personal-assets" class="tab">Personal Assets</div>
+        </div>
+
+        <div id="main-view-marketplace" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column: Player Stats & Achievements -->
+            <div class="lg:col-span-3 space-y-6">
+                <header id="player-header" class="text-center card p-6 no-hover relative border-2"></header>
+                
+                <!-- Combined Financial Summary Card -->
+                <div class="card p-4 no-hover space-y-3">
+                    <div>
+                        <div class="flex justify-between items-baseline">
+                            <h2 class="text-md font-semibold text-gray-300">Net Worth</h2>
+                            <p id="net-worth" class="text-2xl font-bold text-white truncate">$10,000</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700/50"></div>
+                    <div>
+                        <div class="flex justify-between items-baseline">
+                            <h2 class="text-md font-semibold text-green-400">Cash</h2>
+                            <p id="cash-balance" class="text-xl font-bold text-green-400 truncate">$10,000</p>
+                        </div>
+                         <p id="passive-income-display" class="text-xs text-green-400/80 text-right h-4"></p>
+                    </div>
+                     <div class="border-t border-gray-700/50"></div>
+                    <div>
+                        <div class="flex justify-between items-baseline">
+                            <h2 class="text-md font-semibold text-red-400">Taxes Paid</h2>
+                            <p id="taxes-paid" class="text-lg font-bold text-red-400 truncate">$0</p>
+                        </div>
                     </div>
                 </div>
-                <div class="border-t border-gray-700/50"></div>
-                <div>
-                    <div class="flex justify-between items-baseline">
-                        <h2 class="text-md font-semibold text-green-400">Cash</h2>
-                        <p id="cash-balance" class="text-xl font-bold text-green-400 truncate">$10,000</p>
-                    </div>
-                     <p id="passive-income-display" class="text-xs text-green-400/80 text-right h-4"></p>
+
+                <div class="card p-6">
+                     <h2 class="text-xl font-semibold mb-4 text-center">Side Hustle</h2>
+                     <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-300">Next Upgrade</span>
+                            <span id="clicker-progress-text" class="text-sm font-medium text-gray-300">0 / 50</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div id="clicker-progress-bar" class="bg-yellow-400 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                     </div>
+                     <button id="clicker-btn" class="btn btn-primary w-full">Earn $1</button>
                 </div>
-                 <div class="border-t border-gray-700/50"></div>
-                <div>
-                    <div class="flex justify-between items-baseline">
-                        <h2 class="text-md font-semibold text-red-400">Taxes Paid</h2>
-                        <p id="taxes-paid" class="text-lg font-bold text-red-400 truncate">$0</p>
-                    </div>
+                <div class="card p-6">
+                     <h2 class="text-xl font-semibold mb-4 text-center">Consulting Gig</h2>
+                     <button id="consulting-btn" class="btn btn-primary w-full">Take Gig</button>
+                </div>
+                <div class="card p-6">
+                     <h2 class="text-xl font-semibold mb-4 text-center">Achievements</h2>
+                    <div id="achievements-list" class="space-y-4 max-h-[15vh] overflow-y-auto pr-2"></div>
                 </div>
             </div>
 
-            <div class="card p-6">
-                 <h2 class="text-xl font-semibold mb-4 text-center">Side Hustle</h2>
-                 <div class="mb-4">
-                    <div class="flex justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-300">Next Upgrade</span>
-                        <span id="clicker-progress-text" class="text-sm font-medium text-gray-300">0 / 50</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2.5">
-                        <div id="clicker-progress-bar" class="bg-yellow-400 h-2.5 rounded-full" style="width: 0%"></div>
-                    </div>
-                 </div>
-                 <button id="clicker-btn" class="btn btn-primary w-full">Earn $1</button>
+            <!-- Center Column: Marketplace -->
+            <div class="lg:col-span-5 space-y-6">
+                 <div class="card p-6 h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Marketplace</h2>
+                    <div id="marketplace-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[80vh] overflow-y-auto pr-2"></div>
+                </div>
             </div>
-            <div class="card p-6">
-                 <h2 class="text-xl font-semibold mb-4 text-center">Consulting Gig</h2>
-                 <button id="consulting-btn" class="btn btn-primary w-full">Take Gig</button>
-            </div>
-            <div class="card p-6">
-                 <h2 class="text-xl font-semibold mb-4 text-center">Achievements</h2>
-                <div id="achievements-list" class="space-y-4 max-h-[15vh] overflow-y-auto pr-2"></div>
+
+            <!-- Right Column: Portfolio, Businesses, News -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="card p-6">
+                    <div class="flex border-b border-gray-700">
+                        <div id="tab-portfolio" class="tab active">Portfolio</div>
+                        <div id="tab-businesses" class="tab">Businesses</div>
+                        <div id="tab-skills" class="tab">Skills</div>
+                    </div>
+                    <div id="portfolio-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2"></div>
+                    <div id="businesses-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
+                    <div id="skills-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
+                </div>
+                 <div class="card p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Market Index</h2>
+                    <canvas id="market-chart" width="400" height="100"></canvas>
+                    <div class="mt-2 text-center">
+                        <p class="font-bold text-lg" id="index-price">Loading...</p>
+                        <p class="text-sm text-gray-400">Luxe 15 Index</p>
+                    </div>
+                    <div class="flex gap-4 mt-2">
+                        <button id="buy-index-btn" class="btn btn-primary w-full !py-2">Buy</button>
+                        <button id="sell-index-btn" class="btn btn-secondary w-full !py-2">Sell</button>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-center">Market News</h2>
+                    <div id="log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex border-b border-gray-700">
+                        <div id="tab-transactions" class="tab active">Transactions</div>
+                        <div id="tab-income" class="tab">Income</div>
+                    </div>
+                    <div id="transaction-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
+                    <div id="income-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2 hidden"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Center Column: Marketplace -->
-        <div class="lg:col-span-5 space-y-6">
-             <div class="card p-6 h-full">
-                <h2 class="text-xl font-semibold mb-4 text-center">Marketplace</h2>
-                <div id="marketplace-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[80vh] overflow-y-auto pr-2"></div>
-            </div>
-        </div>
-
-        <!-- Right Column: Portfolio, Businesses, News -->
-        <div class="lg:col-span-4 space-y-6">
-            <div class="card p-6">
-                <div class="flex border-b border-gray-700">
-                    <div id="tab-portfolio" class="tab active">Portfolio</div>
-                    <div id="tab-businesses" class="tab">Businesses</div>
-                    <div id="tab-skills" class="tab">Skills</div>
-                </div>
-                <div id="portfolio-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2"></div>
-                <div id="businesses-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
-                <div id="skills-list" class="mt-4 space-y-4 max-h-[25vh] overflow-y-auto pr-2 hidden"></div>
-            </div>
-             <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4 text-center">Market Index</h2>
-                <canvas id="market-chart" width="400" height="100"></canvas>
-                <div class="mt-2 text-center">
-                    <p class="font-bold text-lg" id="index-price">Loading...</p>
-                    <p class="text-sm text-gray-400">Luxe 15 Index</p>
-                </div>
-                <div class="flex gap-4 mt-2">
-                    <button id="buy-index-btn" class="btn btn-primary w-full !py-2">Buy</button>
-                    <button id="sell-index-btn" class="btn btn-secondary w-full !py-2">Sell</button>
-                </div>
-            </div>
-            <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4 text-center">Market News</h2>
-                <div id="log-list" class="space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
-            </div>
-            <div class="card p-6">
-                <div class="flex border-b border-gray-700">
-                    <div id="tab-transactions" class="tab active">Transactions</div>
-                    <div id="tab-income" class="tab">Income</div>
-                </div>
-                <div id="transaction-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2"></div>
-                <div id="income-log-list" class="mt-4 space-y-2 text-sm max-h-[13vh] overflow-y-auto pr-2 hidden"></div>
+        <div id="main-view-personal-assets" class="hidden">
+            <h1 class="text-3xl font-bold text-center mb-6 brand-gradient">Personal Assets</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="personal-assets-list">
+                <!-- Personal assets will be rendered here -->
             </div>
         </div>
     </div>
@@ -405,7 +419,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 1.9 | created by Ozaarkk
+        BETA Version 2.0 | created by Ozaarkk
     </div>
 
     <script>
@@ -421,6 +435,7 @@
             skills: { negotiation: 0, marketing: 0, hustler: 0 },
             totalTaxesPaid: 0,
             indexShares: 0, indexTotalCost: 0, marketHistory: [],
+            personalAssets: [],
         };
         let gameState = { ...initialGameState };
 
@@ -479,6 +494,15 @@
                 business: { name: 'Championship Dynasty', cost: 5000000000, required: 1, income: 5000000 } },
             space_company: { name: 'Space Exploration Co.', basePrice: 15000000000, maxPrice: 50000000000, volatility: 0.6, icon: '🚀', unlock: 25000000000,
                 business: { name: 'Galactic Ventures', cost: 10000000000, required: 1, income: 20000000 } },
+        };
+
+        const personalAssetsConfig = {
+            luxury_sedan: { name: 'Luxury Sedan', cost: 150000, image: 'https://i.imgur.com/UKjkizK.png' },
+            sports_car: { name: 'Exotic Sports Car', cost: 750000, image: 'https://placehold.co/600x400/1f2937/e5e7eb?text=Sports+Car' },
+            city_apartment: { name: 'City Apartment', cost: 2500000, image: 'https://i.imgur.com/81vXMFz.png' },
+            beachfront_villa: { name: 'Beachfront Villa', cost: 15000000, image: 'https://i.imgur.com/LdN5Nbq.png' },
+            country_estate: { name: 'Sprawling Country Estate', cost: 50000000, image: 'https://i.imgur.com/Dp6WtLD.png' },
+            mega_mansion: { name: 'Mega Mansion', cost: 200000000, image: 'https://placehold.co/600x400/1f2937/e5e7eb?text=Mansion' },
         };
         
         const rareItemsConfig = {
@@ -615,7 +639,9 @@
               transactionLogListEl = getEl('transaction-log-list'),
               incomeLogListEl = getEl('income-log-list'),
               achievementModalEl = getEl('achievement-modal'), achievementTitleEl = getEl('achievement-title'),
-              achievementDescriptionEl = getEl('achievement-description'), achievementCloseBtn = getEl('achievement-close-btn');
+              achievementDescriptionEl = getEl('achievement-description'), achievementCloseBtn = getEl('achievement-close-btn'),
+              mainViewMarketplace = getEl('main-view-marketplace'), mainViewPersonalAssets = getEl('main-view-personal-assets'),
+              personalAssetsListEl = getEl('personal-assets-list');
 
         // --- CORE LOGIC ---
         const formatCurrency = (amount) => {
@@ -747,6 +773,16 @@
                 gameState.cash -= business.cost;
                 gameState.businesses[assetId] = { name: business.name, income: business.income };
                 addLog(`Started a ${business.name} business!`, 'business');
+                updateUI();
+            }
+        }
+
+        function buyPersonalAsset(assetId) {
+            const asset = personalAssetsConfig[assetId];
+            if (gameState.cash >= asset.cost && !gameState.personalAssets.includes(assetId)) {
+                gameState.cash -= asset.cost;
+                gameState.personalAssets.push(assetId);
+                addLog(`Purchased a ${asset.name}!`, 'buy');
                 updateUI();
             }
         }
@@ -987,7 +1023,8 @@
             }, 0);
             const businessValue = Object.keys(gameState.businesses).reduce((sum, id) => sum + (assetsConfig[id]?.business?.cost || 0), 0);
             const indexValue = gameState.indexShares * currentMarketAverage;
-            gameState.netWorth = gameState.cash + portfolioValue + businessValue + indexValue;
+            const personalAssetsValue = gameState.personalAssets.reduce((sum, id) => sum + personalAssetsConfig[id].cost, 0);
+            gameState.netWorth = gameState.cash + portfolioValue + businessValue + indexValue + personalAssetsValue;
             if (gameState.netWorth >= gameConfig.winCondition && !gameState.achievements.includes('quadrillionaire')) {
                 winGame();
             }
@@ -1167,6 +1204,7 @@
             renderBusinesses();
             renderAchievements();
             renderSkills();
+            renderPersonalAssets();
             drawMarketChart();
             saveGame();
         }
@@ -1400,6 +1438,37 @@
             }
         }
 
+        function renderPersonalAssets() {
+            personalAssetsListEl.innerHTML = '';
+            for (const assetId in personalAssetsConfig) {
+                const asset = personalAssetsConfig[assetId];
+                const isOwned = gameState.personalAssets.includes(assetId);
+                const canAfford = gameState.cash >= asset.cost;
+
+                const el = document.createElement('div');
+                el.className = 'card overflow-hidden';
+                
+                let buttonHtml;
+                if (isOwned) {
+                    buttonHtml = `<button class="btn btn-disabled w-full" disabled>Owned</button>`;
+                } else {
+                    buttonHtml = `<button onclick="buyPersonalAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
+                }
+
+                el.innerHTML = `
+                    <img src="${asset.image}" alt="${asset.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg text-white">${asset.name}</h3>
+                        <p class="text-yellow-400 font-bold">${formatCurrency(asset.cost)}</p>
+                        <div class="mt-4">
+                            ${buttonHtml}
+                        </div>
+                    </div>
+                `;
+                personalAssetsListEl.appendChild(el);
+            }
+        }
+
         function renderSideHustle() {
             const currentTier = gameConfig.clickerTiers[gameState.clickerLevel];
             const clickValue = gameState.clickerLevel * (1 + gameState.skills.hustler * 0.1);
@@ -1487,6 +1556,17 @@
         }
 
         function setupTabs() {
+            const mainTabs = [getEl('main-tab-marketplace'), getEl('main-tab-personal-assets')];
+            const mainViews = [mainViewMarketplace, mainViewPersonalAssets];
+            mainTabs.forEach((tab, index) => {
+                if(tab) tab.addEventListener('click', () => {
+                    mainTabs.forEach(t => t.classList.remove('active'));
+                    mainViews.forEach(v => v.classList.add('hidden'));
+                    tab.classList.add('active');
+                    mainViews[index].classList.remove('hidden');
+                });
+            });
+
             const portfolioTabs = [getEl('tab-portfolio'), getEl('tab-businesses'), getEl('tab-skills')];
             const portfolioLists = [portfolioListEl, businessesListEl, skillsListEl];
             portfolioTabs.forEach((tab, index) => {
