@@ -331,9 +331,21 @@
         </div>
 
         <div id="main-view-personal-assets" class="hidden">
-            <h1 class="text-3xl font-bold text-center mb-6 brand-gradient">Personal Assets</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="personal-assets-list">
-                <!-- Personal assets will be rendered here -->
+            <div id="personal-assets-list">
+                <!-- Automobiles Section -->
+                <div>
+                    <h2 class="text-2xl font-bold text-center my-6 brand-gradient">Automobiles</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="personal-assets-cars">
+                        <!-- Car assets will be rendered here -->
+                    </div>
+                </div>
+                <!-- Real Estate Section -->
+                 <div>
+                    <h2 class="text-2xl font-bold text-center my-6 brand-gradient">Real Estate</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="personal-assets-homes">
+                        <!-- Home assets will be rendered here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -419,7 +431,7 @@
     <div id="toast"></div>
     <div id="help-button" class="help-button">?</div>
     <div class="fixed bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">
-        BETA Version 2.1 | created by Ozaarkk
+        BETA Version 2.2 | created by Ozaarkk
     </div>
 
     <script>
@@ -435,7 +447,7 @@
             skills: { negotiation: 0, marketing: 0, hustler: 0 },
             totalTaxesPaid: 0,
             indexShares: 0, indexTotalCost: 0, marketHistory: [],
-            personalAssets: [],
+            personalAssets: {},
         };
         let gameState = { ...initialGameState };
 
@@ -497,13 +509,18 @@
         };
 
         const personalAssetsConfig = {
-            luxury_sedan: { name: 'Luxury Sedan', cost: 150000, image: 'https://i.imgur.com/UKjkizK.png' },
-            sports_car: { name: 'Exotic Sports Car', cost: 750000, image: 'https://i.imgur.com/ebfUOKK.png' },
-            city_apartment: { name: 'City Apartment', cost: 2500000, image: 'https://i.imgur.com/81vXMFz.png' },
-            beachfront_villa: { name: 'Beachfront Villa', cost: 15000000, image: 'https://i.imgur.com/LdN5Nbq.png' },
-            country_estate: { name: 'Sprawling Country Estate', cost: 50000000, image: 'https://i.imgur.com/Dp6WtLD.png' },
-            mega_mansion: { name: 'Mega Mansion', cost: 350000000, image: 'https://i.imgur.com/dYSJ4po.png' },
-            luxurious_private_island: { name: 'Luxurious Private Island', cost: 1000000000, image: 'https://i.imgur.com/f4qzs5H.png' },
+            summit_rover: { name: 'Summit Rover', cost: 75000, image: 'https://i.imgur.com/rAFVF2s.png', type: 'car' },
+            valdaro_elite: { name: 'Valdaro Elite', cost: 150000, image: 'https://i.imgur.com/UKjkizK.png', type: 'car' },
+            bw_onyx: { name: 'BW Onyx', cost: 250000, image: 'https://i.imgur.com/VRAamii.png', type: 'car' },
+            vortex_r1: { name: 'Vortex R1', cost: 750000, image: 'https://i.imgur.com/ebfUOKK.png', type: 'car' },
+            stratos_fx: { name: 'Stratos FX', cost: 6000000, image: 'https://i.imgur.com/cutEqDx.png', type: 'car' },
+            ultra_rare_aetherion_x: { name: 'Ultra Rare Aetherion X', cost: 250000000, image: 'https://i.imgur.com/Bkn4axC.png', type: 'car' },
+            city_apartment: { name: 'City Apartment', cost: 2500000, image: 'https://i.imgur.com/81vXMFz.png', type: 'home' },
+            beachfront_villa: { name: 'Beachfront Villa', cost: 15000000, image: 'https://i.imgur.com/LdN5Nbq.png', type: 'home' },
+            penthouse: { name: 'Penthouse', cost: 35000000, image: 'https://i.imgur.com/l0Nrn9G.png', type: 'home' },
+            country_estate: { name: 'Sprawling Country Estate', cost: 50000000, image: 'https://i.imgur.com/Dp6WtLD.png', type: 'home' },
+            mega_mansion: { name: 'Mega Mansion', cost: 350000000, image: 'https://i.imgur.com/dYSJ4po.png', type: 'home' },
+            luxurious_private_island: { name: 'Luxurious Private Island', cost: 1000000000, image: 'https://i.imgur.com/f4qzs5H.png', type: 'home' },
         };
         
         const rareItemsConfig = {
@@ -642,7 +659,7 @@
               achievementModalEl = getEl('achievement-modal'), achievementTitleEl = getEl('achievement-title'),
               achievementDescriptionEl = getEl('achievement-description'), achievementCloseBtn = getEl('achievement-close-btn'),
               mainViewMarketplace = getEl('main-view-marketplace'), mainViewPersonalAssets = getEl('main-view-personal-assets'),
-              personalAssetsListEl = getEl('personal-assets-list');
+              personalAssetsCarsEl = getEl('personal-assets-cars'), personalAssetsHomesEl = getEl('personal-assets-homes');
 
         // --- CORE LOGIC ---
         const formatCurrency = (amount) => {
@@ -780,9 +797,12 @@
 
         function buyPersonalAsset(assetId) {
             const asset = personalAssetsConfig[assetId];
-            if (gameState.cash >= asset.cost && !gameState.personalAssets.includes(assetId)) {
+            if (gameState.cash >= asset.cost) {
                 gameState.cash -= asset.cost;
-                gameState.personalAssets.push(assetId);
+                if (!gameState.personalAssets[assetId]) {
+                    gameState.personalAssets[assetId] = 0;
+                }
+                gameState.personalAssets[assetId]++;
                 addLog(`Purchased a ${asset.name}!`, 'buy');
                 updateUI();
             }
@@ -1024,7 +1044,7 @@
             }, 0);
             const businessValue = Object.keys(gameState.businesses).reduce((sum, id) => sum + (assetsConfig[id]?.business?.cost || 0), 0);
             const indexValue = gameState.indexShares * currentMarketAverage;
-            const personalAssetsValue = gameState.personalAssets.reduce((sum, id) => sum + personalAssetsConfig[id].cost, 0);
+            const personalAssetsValue = Object.entries(gameState.personalAssets).reduce((sum, [id, quantity]) => sum + (personalAssetsConfig[id].cost * quantity), 0);
             gameState.netWorth = gameState.cash + portfolioValue + businessValue + indexValue + personalAssetsValue;
             if (gameState.netWorth >= gameConfig.winCondition && !gameState.achievements.includes('quadrillionaire')) {
                 winGame();
@@ -1440,33 +1460,39 @@
         }
 
         function renderPersonalAssets() {
-            personalAssetsListEl.innerHTML = '';
-            for (const assetId in personalAssetsConfig) {
-                const asset = personalAssetsConfig[assetId];
-                const isOwned = gameState.personalAssets.includes(assetId);
+            personalAssetsCarsEl.innerHTML = '';
+            personalAssetsHomesEl.innerHTML = '';
+
+            const sortedAssets = Object.entries(personalAssetsConfig).sort(([,a],[,b]) => a.cost - b.cost);
+
+            for (const [assetId, asset] of sortedAssets) {
+                const ownedCount = gameState.personalAssets[assetId] || 0;
                 const canAfford = gameState.cash >= asset.cost;
 
                 const el = document.createElement('div');
                 el.className = 'card overflow-hidden';
                 
-                let buttonHtml;
-                if (isOwned) {
-                    buttonHtml = `<button class="btn btn-disabled w-full" disabled>Owned</button>`;
-                } else {
-                    buttonHtml = `<button onclick="buyPersonalAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
-                }
-
+                const buttonHtml = `<button onclick="buyPersonalAsset('${assetId}')" class="btn ${canAfford ? 'btn-primary' : 'btn-disabled'} w-full" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
+                
                 el.innerHTML = `
                     <img src="${asset.image}" alt="${asset.name}" class="w-full h-48 object-cover">
                     <div class="p-4">
-                        <h3 class="font-semibold text-lg text-white">${asset.name}</h3>
+                        <div class="flex justify-between items-center">
+                           <h3 class="font-semibold text-lg text-white">${asset.name}</h3>
+                           <p class="text-sm text-gray-400">Owned: ${ownedCount}</p>
+                        </div>
                         <p class="text-yellow-400 font-bold">${formatCurrency(asset.cost)}</p>
                         <div class="mt-4">
                             ${buttonHtml}
                         </div>
                     </div>
                 `;
-                personalAssetsListEl.appendChild(el);
+                
+                if (asset.type === 'car') {
+                    personalAssetsCarsEl.appendChild(el);
+                } else if (asset.type === 'home') {
+                    personalAssetsHomesEl.appendChild(el);
+                }
             }
         }
 
