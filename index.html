@@ -675,7 +675,18 @@
             try {
                 const stateToSave = {...gameState};
                 delete stateToSave.marketHistory; // Don't save the chart history
-                localStorage.setItem(gameConfig.saveKey, JSON.stringify(stateToSave));
+
+                const pricesToSave = {};
+                for (const assetId in assetsConfig) {
+                    pricesToSave[assetId] = assetsConfig[assetId].currentPrice;
+                }
+
+                const fullSaveData = {
+                    gameState: stateToSave,
+                    marketPrices: pricesToSave
+                };
+
+                localStorage.setItem(gameConfig.saveKey, JSON.stringify(fullSaveData));
             } catch (e) {
                 console.error("Failed to save game:", e);
                 showToast("Error: Could not save progress.");
@@ -687,7 +698,16 @@
             if (savedData) {
                 try {
                     const parsedData = JSON.parse(savedData);
-                    gameState = { ...initialGameState, ...parsedData, marketHistory: [] }; // Reset history on load
+                    gameState = { ...initialGameState, ...parsedData.gameState, marketHistory: [] };
+                    
+                    if (parsedData.marketPrices) {
+                        for (const assetId in parsedData.marketPrices) {
+                            if (assetsConfig[assetId]) {
+                                assetsConfig[assetId].currentPrice = parsedData.marketPrices[assetId];
+                            }
+                        }
+                    }
+
                     return true;
                 } catch (e) {
                     console.error("Error loading saved data:", e);
@@ -1618,20 +1638,22 @@
         }
 
         function init() {
-            // Initialize asset prices from config
-            let initialTotalValue = 0;
-            const assetCount = Object.keys(assetsConfig).length;
-            for (const id in assetsConfig) {
-                const asset = assetsConfig[id];
-                asset.currentPrice = asset.basePrice;
-                asset.priceChange = 0;
-                asset.targetPrice = null;
-                asset.transitionTicks = 0;
-                initialTotalValue += asset.basePrice;
+            if (!loadGame()) {
+                // Initialize asset prices from config only if no save data
+                let initialTotalValue = 0;
+                const assetCount = Object.keys(assetsConfig).length;
+                for (const id in assetsConfig) {
+                    const asset = assetsConfig[id];
+                    asset.currentPrice = asset.basePrice;
+                    asset.priceChange = 0;
+                    asset.targetPrice = null;
+                    asset.transitionTicks = 0;
+                    initialTotalValue += asset.basePrice;
+                }
+                currentMarketAverage = initialTotalValue / assetCount;
             }
-            currentMarketAverage = initialTotalValue / assetCount;
 
-            if (loadGame()) {
+            if (gameState.playerName !== 'Tycoon') { // A simple check to see if a game is in progress
                 runGame();
             } else {
                 characterScreenEl.classList.add('visible');
