@@ -707,6 +707,14 @@
                             }
                         }
                     }
+                    
+                    // Recalculate market average after loading prices
+                    let totalMarketValue = 0;
+                    const assetCount = Object.keys(assetsConfig).length;
+                    for (const id in assetsConfig) {
+                        totalMarketValue += assetsConfig[id].currentPrice;
+                    }
+                    currentMarketAverage = totalMarketValue / assetCount;
 
                     return true;
                 } catch (e) {
@@ -1638,8 +1646,10 @@
         }
 
         function init() {
-            if (!loadGame()) {
-                // Initialize asset prices from config only if no save data
+            if (loadGame()) {
+                runGame();
+            } else {
+                // This block only runs for a brand new game
                 let initialTotalValue = 0;
                 const assetCount = Object.keys(assetsConfig).length;
                 for (const id in assetsConfig) {
@@ -1651,11 +1661,6 @@
                     initialTotalValue += asset.basePrice;
                 }
                 currentMarketAverage = initialTotalValue / assetCount;
-            }
-
-            if (gameState.playerName !== 'Tycoon') { // A simple check to see if a game is in progress
-                runGame();
-            } else {
                 characterScreenEl.classList.add('visible');
             }
             
